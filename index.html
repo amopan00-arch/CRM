@@ -1,0 +1,3179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM v28 — nhood Development</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.4.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --bg:#ffffff; --bg2:#f7f7f5; --bg3:#f0efe9;
+  --text:#1a1a18; --text2:#6b6b65; --text3:#9e9d97;
+  --border:rgba(0,0,0,.08); --border2:rgba(0,0,0,.16);
+  --accent:#185fa5; --accent-h:#0c447c; --accent-l:#e6f1fb;
+  --ok:#3b6d11; --ok-bg:#eaf3de;
+  --warn:#854f0b; --warn-bg:#faeeda;
+  --err:#a32d2d; --err-bg:#fcebeb;
+  --rad:10px; --rads:7px;
+  --shadow:0 1px 4px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.15);
+  --panel-w:560px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a; --bg2:#242422; --bg3:#2c2c2a;
+    --text:#e8e7e2; --text2:#9e9d97; --text3:#6b6b65;
+    --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.16);
+    --accent:#378add; --accent-h:#85b7eb; --accent-l:#042c53;
+    --ok:#97c459; --ok-bg:#173404;
+    --warn:#ef9f27; --warn-bg:#412402;
+    --err:#f09595; --err-bg:#501313;
+  }
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:13px}
+#shell{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:200px;min-width:200px;background:var(--bg2);border-right:.5px solid var(--border);display:flex;flex-direction:column;transition:width .2s}
+#sidebar.collapsed{width:48px;min-width:48px}
+#sidebar.collapsed .nav-lbl,#sidebar.collapsed .brand-name,#sidebar.collapsed .nav-sec,#sidebar.collapsed .nbadge{display:none}
+#sidebar.collapsed .nav-item{justify-content:center;padding:8px}
+.brand{padding:13px 11px 9px;border-bottom:.5px solid var(--border);display:flex;align-items:center;gap:8px}
+.brand-icon{width:28px;height:28px;background:var(--accent);border-radius:var(--rads);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;font-size:14px}
+.brand-name{font-size:12px;font-weight:600;flex:1;line-height:1.3}
+.brand-sub{font-size:10px;color:var(--text2)}
+.collapse-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:2px;flex-shrink:0}
+.nav-sec{padding:11px 9px 3px;font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 8px;margin:1px 5px;border-radius:var(--rads);cursor:pointer;font-size:12px;color:var(--text2);transition:all .12s;white-space:nowrap;overflow:hidden}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg);color:var(--text);font-weight:500}
+.nav-item i{font-size:16px;flex-shrink:0}
+.nav-lbl{flex:1;overflow:hidden;text-overflow:ellipsis}
+.nbadge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;background:var(--accent-l);color:var(--accent);margin-left:auto;flex-shrink:0}
+#sidebar-footer{margin-top:auto;border-top:.5px solid var(--border);padding:6px 5px}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+#topbar{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:.5px solid var(--border);background:var(--bg);flex-shrink:0}
+#page-title{font-size:14px;font-weight:600;flex:1}
+.sync-info{font-size:10px;color:var(--text3);white-space:nowrap}
+.search-wrap{display:flex;align-items:center;gap:5px;background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rads);padding:5px 9px;min-width:200px}
+.search-wrap input{background:none;border:none;outline:none;color:var(--text);font-size:12px;width:100%}
+.search-wrap i{font-size:14px;color:var(--text3);flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;font-size:12px;font-weight:500;border-radius:var(--rads);cursor:pointer;border:.5px solid var(--border2);background:var(--bg);color:var(--text);transition:all .12s;font-family:inherit;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--bg2)}
+.btn:disabled{opacity:.45;cursor:default;pointer-events:none}
+.btn i{font-size:14px}
+.btn-primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn-primary:hover{background:var(--accent-h)}
+.btn-sm{padding:3px 8px;font-size:11px}
+.btn-icon{padding:5px 7px}
+.btn-danger{background:var(--err-bg);color:var(--err);border-color:var(--err)}
+#content{flex:1;overflow:hidden;display:flex;position:relative}
+.view{display:none;flex:1;overflow-y:auto;padding:16px 18px}
+.view.active{display:block}
+.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.kpi{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rads);padding:12px 14px}
+.kpi-lbl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em}
+.kpi-val{font-size:22px;font-weight:700;margin:3px 0 1px;line-height:1}
+.kpi-sub{font-size:10px;color:var(--text2)}
+.tbl-wrap{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rad);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:8px 10px;font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;background:var(--bg2);border-bottom:.5px solid var(--border);white-space:nowrap}
+td{padding:9px 10px;border-bottom:.5px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2);cursor:pointer}
+.info-val{font-size:12px;padding:7px 10px;background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rads);color:var(--text);min-height:32px;line-height:1.6;word-break:break-word}
+.td-sm{font-size:11px;color:var(--text2)}
+.td-clip{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:500;white-space:nowrap}
+.tag-blue{background:var(--accent-l);color:var(--accent)}
+.tag-green{background:var(--ok-bg);color:var(--ok)}
+.tag-amber{background:var(--warn-bg);color:var(--warn)}
+.tag-red{background:var(--err-bg);color:var(--err)}
+.tag-gray{background:var(--bg3);color:var(--text2);border:.5px solid var(--border)}
+.filter-bar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.f-chip{padding:3px 10px;font-size:11px;border-radius:10px;cursor:pointer;border:.5px solid var(--border);background:transparent;color:var(--text2);font-family:inherit;transition:all .12s}
+.f-chip:hover,.f-chip.on{background:var(--bg2);color:var(--text);border-color:var(--border2);font-weight:500}
+.f-sep{width:.5px;height:18px;background:var(--border);flex-shrink:0}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-title{font-size:13px;font-weight:600}
+.sec-link{cursor:pointer;border-radius:6px;padding:1px 4px;margin-left:-4px;transition:color .12s,background .12s}
+.sec-link:hover{color:var(--accent);background:var(--bg3)}
+.tag-link{cursor:pointer;transition:border-color .12s,color .12s}
+.tag-link:hover{color:var(--accent);border-color:var(--accent)}
+.sec-sub{font-size:10px;color:var(--text2);margin-top:1px}
+.fu-card{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg);border:.5px solid var(--border);border-radius:var(--rads);margin-bottom:6px;cursor:pointer;transition:border-color .12s}
+.fu-card:hover{border-color:var(--border2)}
+.fu-main{flex:1;min-width:0}
+.fu-company{font-size:12px;font-weight:600}
+.fu-contact{font-size:10px;color:var(--text2);margin-top:1px}
+.fu-projs{margin-top:5px;display:flex;flex-wrap:wrap;gap:3px}
+.fu-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.fub{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:500}
+.fub-over{background:var(--err-bg);color:var(--err)}
+.fub-today{background:var(--warn-bg);color:var(--warn)}
+.fub-soon{background:var(--accent-l);color:var(--accent)}
+.fub-ok{background:var(--bg3);color:var(--text2)}
+#panel-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:100}
+#panel-overlay.open{display:block}
+#detail-panel{position:fixed;top:0;right:calc(-1 * var(--panel-w) - 20px);width:var(--panel-w);height:100vh;background:var(--bg);border-left:.5px solid var(--border2);display:flex;flex-direction:column;z-index:101;transition:right .22s cubic-bezier(.32,.72,0,1);box-shadow:var(--shadow-lg)}
+#detail-panel.open{right:0}
+#panel-hdr{padding:14px 16px 10px;border-bottom:.5px solid var(--border);flex-shrink:0;position:relative;padding-right:44px}
+#panel-title{font-size:15px;font-weight:700;line-height:1.3}
+#panel-sub{font-size:10px;color:var(--text2);margin-top:2px}
+#panel-tags{margin-top:7px;display:flex;flex-wrap:wrap;gap:4px}
+.panel-close{position:absolute;top:12px;right:12px}
+#panel-tabs{display:flex;border-bottom:.5px solid var(--border);flex-shrink:0;overflow-x:auto}
+.p-tab{padding:8px 14px;font-size:11px;font-weight:500;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:all .12s;white-space:nowrap;flex-shrink:0}
+.p-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+#panel-body{flex:1;overflow-y:auto;padding:14px 16px}
+.form-group{margin-bottom:12px}
+.form-label{display:flex;align-items:baseline;gap:5px;font-size:9px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.form-asana{font-size:8px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
+.form-input{width:100%;padding:7px 9px;font-size:12px;border:.5px solid var(--border2);border-radius:var(--rads);background:var(--bg);color:var(--text);font-family:inherit;transition:border-color .12s}
+.form-input:focus{outline:none;border-color:var(--accent)}
+.form-input[readonly]{background:var(--bg2);color:var(--text2);cursor:default}
+textarea.form-input{resize:vertical;min-height:60px}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6b65'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:22px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.saved-flash{border-color:var(--ok)!important;transition:border-color .1s}
+.err-flash{border-color:var(--err)!important}
+.contact-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border:.5px solid var(--border);border-radius:var(--rads);margin-bottom:6px;background:var(--bg2)}
+.c-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:var(--accent-l);color:var(--accent)}
+.c-info{flex:1;min-width:0}
+.c-name{font-size:12px;font-weight:600}
+.c-role{font-size:10px;color:var(--text2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmt-item{display:flex;gap:9px;margin-bottom:12px}
+.cmt-av{width:26px;height:26px;border-radius:50%;background:var(--bg3);border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--text2);flex-shrink:0;margin-top:1px}
+.cmt-bubble{flex:1;background:var(--bg2);border:.5px solid var(--border);border-radius:0 var(--rads) var(--rads) var(--rads);padding:8px 10px}
+.cmt-meta{font-size:9px;color:var(--text3);margin-bottom:3px}
+.cmt-text{font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.cmt-compose{display:flex;gap:8px;align-items:flex-end;margin-top:14px;padding-top:12px;border-top:.5px solid var(--border)}
+.att-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;background:var(--accent-l);color:var(--accent);font-size:11px;font-weight:500;border:.5px solid var(--accent);cursor:pointer;text-decoration:none;transition:background .12s;margin-top:5px}
+.att-chip:hover{background:var(--accent);color:#fff}
+.att-chip i{font-size:13px;flex-shrink:0}
+.att-chip.att-loading{opacity:.6;cursor:wait;pointer-events:none}
+.att-preview{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg2);border:.5px solid var(--border);border-radius:6px;font-size:11px;color:var(--text2)}
+.att-preview i{font-size:14px;color:var(--accent)}
+.att-preview .att-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.att-preview .att-remove{background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0;display:flex;align-items:center}
+.att-preview .att-remove:hover{color:var(--err)}
+.btn-attach{background:none;border:.5px solid var(--border);border-radius:var(--rads);padding:5px 7px;cursor:pointer;color:var(--text2);font-size:14px;display:flex;align-items:center;transition:all .12s;flex-shrink:0}
+.btn-attach:hover{background:var(--bg2);color:var(--accent)}
+.proj-cmt-item{display:flex;gap:6px;align-items:flex-start;margin-bottom:7px;padding-bottom:7px;border-bottom:.5px dashed var(--border)}
+.proj-cmt-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.proj-cmt-body{flex:1;min-width:0}
+.proj-cmt-meta{font-size:9px;color:var(--text3);margin-bottom:2px}
+.proj-cmt-txt{font-size:11px;color:var(--text);line-height:1.4;white-space:pre-wrap;word-break:break-word}
+.proj-cmt-acts{display:flex;gap:2px;flex-shrink:0;margin-top:1px}
+.proj-cmt-edit{background:var(--bg3);border:.5px solid var(--border);border-radius:var(--rads);padding:8px;margin-top:5px}
+.proj-company-wrap{margin-bottom:6px}
+.proj-company-wrap .proj-company-row{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0}
+.pcr-compose{background:var(--bg2);border:.5px solid var(--border);border-top:none;border-radius:0 0 var(--rads) var(--rads);padding:8px 10px}
+.loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:40px;color:var(--text2);font-size:12px}
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:12px}
+.empty i{font-size:24px;display:block;margin-bottom:6px}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:var(--bg);padding:9px 14px;border-radius:var(--rads);font-size:12px;font-weight:500;z-index:9999;box-shadow:var(--shadow-lg);display:none;max-width:320px}
+#toast.is-err{background:var(--err);color:#fff}
+.cfg-card{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rad);padding:16px 18px;margin-bottom:14px;max-width:500px}
+.cfg-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.proj-card{background:var(--bg);border:.5px solid var(--border);border-left:3px solid var(--border2);border-radius:var(--rad);padding:14px 16px;cursor:pointer;transition:all .12s}
+.proj-card:hover{border-color:var(--border2);border-left-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow)}
+.proj-card.has-data{border-left-color:var(--accent)}
+.proj-card.proj-archived{opacity:.6;border-left-color:var(--text3)!important;filter:grayscale(.3)}
+.proj-card.proj-archived:hover{opacity:.9;transform:none}
+.arch-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;padding:1px 7px;border-radius:8px;background:var(--bg3);color:var(--text3);border:.5px solid var(--border);vertical-align:middle}
+.proj-name{font-size:13px;font-weight:700;margin-bottom:4px}
+.proj-desc{font-size:11px;color:var(--text2);margin-bottom:10px;min-height:16px;line-height:1.45}
+.proj-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.metric{display:flex;flex-direction:column;align-items:center;background:var(--bg2);border-radius:var(--rads);padding:7px 8px;text-align:center}
+.metric-val{font-size:14px;font-weight:700;color:var(--accent);line-height:1}
+.metric-val.empty{color:var(--text3);font-size:13px}
+.metric-lbl{font-size:9px;color:var(--text2);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.proj-pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill-fu{background:var(--accent-l);color:var(--accent);border-radius:8px;font-size:10px;font-weight:600;padding:2px 8px;display:inline-flex;align-items:center;gap:3px}
+.pill-pr{background:var(--ok-bg);color:var(--ok);border-radius:8px;font-size:10px;font-weight:600;padding:2px 8px;display:inline-flex;align-items:center;gap:3px}
+.pill-dc{background:var(--err-bg);color:var(--err);border-radius:8px;font-size:10px;font-weight:600;padding:2px 8px;display:inline-flex;align-items:center;gap:3px}
+.proj-companies{margin-top:10px;border-top:.5px solid var(--border);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.proj-cat-section{}
+.proj-cat-hdr{display:flex;align-items:center;gap:5px;margin-bottom:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.proj-cat-hdr.hdr-fu{color:var(--accent)}
+.proj-cat-hdr.hdr-pr{color:var(--ok)}
+.proj-cat-hdr.hdr-dc{color:var(--err)}
+.proj-cat-count{border-radius:6px;padding:1px 5px;font-size:9px;font-weight:700}
+.proj-cat-count.cnt-fu{background:var(--accent-l);color:var(--accent)}
+.proj-cat-count.cnt-pr{background:var(--ok-bg);color:var(--ok)}
+.proj-cat-count.cnt-dc{background:var(--err-bg);color:var(--err)}
+.proj-company-chips{display:flex;flex-wrap:wrap;gap:4px}
+.proj-chip{font-size:10px;padding:2px 8px;border-radius:6px;cursor:pointer;transition:opacity .12s;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.proj-chip:hover{opacity:.75}
+.proj-chip-fu{background:var(--accent-l);color:var(--accent)}
+.proj-chip-pr{background:var(--ok-bg);color:var(--ok)}
+.proj-chip-dc{background:var(--err-bg);color:var(--err)}
+.proj-company-row{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:.5px solid var(--border);border-radius:var(--rads);margin-bottom:6px;cursor:pointer;background:var(--bg2);transition:all .12s}
+.proj-company-row:hover{border-color:var(--accent);background:var(--bg)}
+.proj-link-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border-radius:var(--rads);border:.5px solid var(--border);margin-bottom:5px;cursor:pointer;transition:all .12s}
+.proj-link-row:hover{border-color:var(--accent);background:var(--bg);color:var(--accent)}
+.proj-link-row:hover .proj-link-name{color:var(--accent)}
+.proj-link-name{font-size:12px;font-weight:500;flex:1}
+.pcr-main{flex:1;min-width:0}
+.pcr-name{font-size:12px;font-weight:600;margin-bottom:2px}
+.pcr-contact{font-size:10px;color:var(--text2);margin-bottom:5px}
+.pcr-notes{font-size:11px;color:var(--text);line-height:1.45;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pcr-notes.empty{color:var(--text3);font-style:italic}
+.pcr-footer{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pcr-arrow{flex-shrink:0;color:var(--text3);font-size:16px;margin-top:2px;transition:color .12s}
+.proj-company-row:hover .pcr-arrow{color:var(--accent)}
+.pcr-row-actions{display:flex;flex-direction:column;gap:3px;padding:2px 0;flex-shrink:0}
+.pcr-log-date{font-size:10px;color:var(--text2);margin:3px 0 4px;display:flex;align-items:center;gap:3px}
+.pcr-log-notes{font-size:11px;color:var(--text2);font-style:italic;margin:2px 0 5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pcr-edit-form{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rads);padding:10px 12px;margin:0 0 6px}
+.icon-btn-sm{background:none;border:.5px solid var(--border);border-radius:5px;cursor:pointer;color:var(--text2);width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .12s;flex-shrink:0;padding:0}
+.icon-btn-sm:hover{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.icon-btn-sm.del:hover{color:var(--err);border-color:var(--err)}
+.proj-add-box{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rads);padding:12px;margin-bottom:14px}
+.stbtn-group{display:inline-flex;gap:3px;flex-wrap:wrap}
+.stbtn{font-size:10px;padding:2px 8px;border-radius:8px;border:.5px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;font-weight:500;transition:all .12s}
+.stbtn:hover{border-color:var(--border2);color:var(--text)}
+.stbtn.on.stb-fu{background:var(--accent-l);color:var(--accent);border-color:transparent;font-weight:700}
+.stbtn.on.stb-pr{background:var(--ok-bg);color:var(--ok);border-color:transparent;font-weight:700}
+.stbtn.on.stb-dc{background:var(--err-bg);color:var(--err);border-color:transparent;font-weight:700}
+.proj-edit-row{padding:9px 11px;border:.5px solid var(--border);border-radius:var(--rads);margin-bottom:6px;background:var(--bg2)}
+.per-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.per-name{font-size:12px;font-weight:600;cursor:pointer;flex:1;min-width:0}
+.per-name:hover{color:var(--accent)}
+.per-metrics{font-size:10px;color:var(--text2);flex-shrink:0}
+.per-rm{flex-shrink:0;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px;line-height:1;border-radius:6px}
+.per-rm:hover{color:var(--err);background:var(--err-bg)}
+.proj-add{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:10px;border:.5px dashed var(--border2);border-radius:var(--rads);margin-bottom:12px;background:var(--bg2)}
+.proj-add select{flex:1;min-width:120px;padding:6px 8px;font-size:12px;border:.5px solid var(--border2);border-radius:var(--rads);background:var(--bg);color:var(--text);font-family:inherit}
+.pc-wrap{margin-top:8px;border-top:.5px dashed var(--border);padding-top:8px}
+.pc-item{display:flex;gap:6px;align-items:flex-start;font-size:11px;line-height:1.45;margin-bottom:6px}
+.pc-item .pc-body{flex:1;min-width:0;background:var(--bg);border:.5px solid var(--border);border-radius:var(--rads);padding:6px 8px}
+.pc-item .pc-date{display:block;font-size:9px;color:var(--text3);margin-bottom:2px}
+.pc-item .pc-txt{white-space:pre-wrap;word-break:break-word}
+.pc-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:2px;line-height:1}
+.pc-del:hover{color:var(--err)}
+.pc-compose{display:flex;gap:6px;align-items:flex-end;margin-top:6px}
+.pc-compose textarea{flex:1;min-height:32px}
+.pc-empty{font-size:10px;color:var(--text3);font-style:italic;margin-bottom:6px}
+.last-act-wrap{border-top:.5px dashed var(--border);padding-top:8px;margin-top:8px}
+.last-act-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:6px}
+.last-act-date{font-size:9px;color:var(--accent);white-space:nowrap;flex-shrink:0;margin-top:2px;font-weight:500}
+.last-act-text{flex:1;min-width:0;font-size:11px;color:var(--text2);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.last-act-empty{font-size:10px;color:var(--text3);font-style:italic}
+.proj-company-activity{display:flex;gap:5px;align-items:flex-start;margin:4px 0 4px;min-height:16px}
+.proj-company-activity-date{font-size:9px;color:var(--accent);white-space:nowrap;flex-shrink:0;font-weight:500}
+.proj-company-activity-text{flex:1;font-size:10px;color:var(--text2);line-height:1.35;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
+.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}
+.dash-section{background:var(--bg);border:.5px solid var(--border);border-radius:var(--rad);overflow:hidden;display:flex;flex-direction:column}
+.dash-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:.5px solid var(--border);background:var(--bg2);flex-shrink:0}
+.dash-section-title{font-size:11px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.dash-section-count{font-size:10px;font-weight:700;padding:1px 8px;border-radius:8px;background:var(--bg3);color:var(--text2)}
+.dash-section-body{overflow-y:auto;max-height:270px}
+.dash-item{display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:.5px solid var(--border);cursor:pointer;transition:background .1s;min-width:0}
+.dash-item:last-child{border-bottom:none}
+.dash-item:hover{background:var(--bg2)}
+.dash-item-name{font-size:12px;font-weight:500;min-width:0;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.dash-group-lbl{padding:4px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:.5px solid var(--border);flex-shrink:0}
+.dash-no-item{padding:7px 14px;font-size:11px;color:var(--text3)}
+.fees-bar-bg{width:44px;flex-shrink:0;height:4px;background:var(--bg3);border-radius:2px;position:relative;overflow:hidden}
+.fees-bar-fill{position:absolute;inset:0 auto 0 0;height:4px;border-radius:2px;background:var(--accent)}
+@media(max-width:700px){
+  #detail-panel{width:100%;--panel-w:100%}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .form-row{grid-template-columns:1fr}
+  .dash-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <div id="sidebar">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-building-skyscraper"></i></div>
+      <div class="brand-name">nhood CRM<div class="brand-sub">Development</div></div>
+      <button class="collapse-btn" onclick="toggleSidebar()"><i class="ti ti-layout-sidebar-left-collapse"></i></button>
+    </div>
+    <div class="nav-sec">Principal</div>
+    <div class="nav-item active" onclick="nav('dashboard')"><i class="ti ti-layout-dashboard"></i><span class="nav-lbl">Dashboard</span></div>
+    <div class="nav-sec">Gestión</div>
+    <div class="nav-item" onclick="nav('empresas')"><i class="ti ti-building"></i><span class="nav-lbl">Empresas</span><span class="nbadge" id="b-empresas">–</span></div>
+    <div class="nav-item" onclick="nav('seguimiento')"><i class="ti ti-calendar-check"></i><span class="nav-lbl">Seguimiento</span><span class="nbadge" id="b-fu">–</span></div>
+    <div class="nav-item" onclick="nav('proyectos')"><i class="ti ti-chart-bar"></i><span class="nav-lbl">Proyectos</span><span class="nbadge" id="b-projs">–</span></div>
+    <div id="sidebar-footer">
+      <div class="nav-item" onclick="nav('config')"><i class="ti ti-settings"></i><span class="nav-lbl">Configuración</span></div>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="topbar">
+      <div id="page-title">Dashboard</div>
+      <div class="search-wrap" id="search-box" style="display:none">
+        <i class="ti ti-search"></i>
+        <input type="text" id="search-input" placeholder="Empresa, contacto, email..." oninput="onSearch(this.value)">
+      </div>
+      <span class="sync-info" id="sync-info"></span>
+      <button class="btn btn-sm" id="btn-sync" onclick="syncNow()" style="display:none"><i class="ti ti-refresh"></i> Sync</button>
+      <button class="btn btn-primary btn-sm" id="btn-add" onclick="openAdd()" style="display:none"><i class="ti ti-plus"></i> Nueva empresa</button>
+    </div>
+
+    <div id="content">
+
+      <div class="view active" id="view-dashboard">
+        <div class="kpi-row" id="kpi-row"></div>
+        <div id="dash-fu"></div>
+      </div>
+
+      <div class="view" id="view-empresas">
+        <div class="filter-bar" id="emp-filters"></div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr id="emp-thead"></tr></thead>
+            <tbody id="emp-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="view" id="view-seguimiento">
+        <div class="filter-bar" id="seg-filters"></div>
+        <div id="seg-content"></div>
+      </div>
+
+      <div class="view" id="view-proyectos">
+        <div class="filter-bar" id="proj-filters"></div>
+        <div class="proj-grid" id="proj-grid"></div>
+        <div id="proj-archived"></div>
+      </div>
+
+      <div class="view" id="view-config">
+        <div class="cfg-card">
+          <div class="cfg-title"><i class="ti ti-plug"></i> Conexión Asana</div>
+          <div class="form-group">
+            <label class="form-label">Personal Access Token (PAT)</label>
+            <input class="form-input" id="cfg-pat" type="password" placeholder="1/XXXXXXXXXX:YYYYYYYYYYYY">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="connectAsana()"><i class="ti ti-check"></i> Conectar y sincronizar</button>
+            <button class="btn" onclick="disconnectAsana()"><i class="ti ti-unlink"></i> Desconectar</button>
+          </div>
+          <div id="cfg-status" style="font-size:11px;color:var(--text2);margin-top:10px"></div>
+        </div>
+        <div class="cfg-card">
+          <div class="cfg-title"><i class="ti ti-chart-bar"></i> PROYECTOS EXPANSIÓN</div>
+          <p style="font-size:11px;color:var(--text2);margin-bottom:10px">Sincronización con el proyecto Asana "PROYECTOS EXPANSIÓN". Los campos financieros están configurados y mapeados directamente.</p>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:11px;color:var(--ok)"><i class="ti ti-check"></i> 7 campos configurados</span>
+            <a href="https://app.asana.com/1/1200164847043615/project/1215962562857614" target="_blank" class="btn btn-sm"><i class="ti ti-external-link"></i> Abrir en Asana</a>
+          </div>
+          <div style="font-size:10px;color:var(--text3);margin-top:8px;line-height:1.6">
+            INVERSION PREVISTA · FEES NHOOD PREVISTOS · GLA/SBA M² · YOC · TIR/IRR · EXIT YIELD · PLAZO
+          </div>
+          <div id="cfg-proj-status" style="font-size:11px;color:var(--text2);margin-top:8px"></div>
+        </div>
+        <div class="cfg-card">
+          <div class="cfg-title"><i class="ti ti-database"></i> Datos locales</div>
+          <p style="font-size:11px;color:var(--text2);margin-bottom:10px">Los datos de Asana se cachean en localStorage. Los contactos adicionales se almacenan solo localmente.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i> Exportar JSON</button>
+            <button class="btn btn-danger btn-sm" onclick="clearCache()"><i class="ti ti-trash"></i> Limpiar caché</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="panel-overlay" onclick="closePanel()"></div>
+<div id="detail-panel">
+  <div id="panel-hdr">
+    <button class="btn btn-icon panel-close" onclick="closePanel()"><i class="ti ti-x"></i></button>
+    <div id="panel-title"></div>
+    <div id="panel-sub"></div>
+    <div id="panel-tags"></div>
+  </div>
+  <div id="panel-tabs"></div>
+  <div id="panel-body"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════
+const PROJECT_GID  = '1207492069447727';
+const PROJ_EXP_GID = '1215962562857614';
+const API          = 'https://app.asana.com/api/1.0';
+const SYNC_MS      = 5 * 60 * 1000;
+
+// CRM project custom fields
+const CF = {
+  contacto:     '1209632247537106',
+  cargo:        '1207492074609817',
+  email:        '1206928088631244',
+  telefono:     '1207492074609811',
+  rol:          '1207492074609821',
+  keyAccount:   '1207492074609866',
+  // Project-status fields are now REFERENCE fields linked a tareas de PROYECTOS EXPANSIÓN
+  // (antes eran multi_enum: presented 1209617130500743 · followUp 1209617095391624 · declined 1209617039190444)
+  presented:    '1215958573007633', // PROJECTS_PRESENTED (reference)
+  followUp:     '1215971768072413', // FOLLOW_UP (reference)
+  declined:     '1215972059767078', // DECLINED (reference)
+  dateFU:       '1207492074609852',
+  notasUltimo:  '1211170065095438',
+  webLinkedin:  '1211531834748774',
+  nda:          '1211968953192782',
+  localizacion: '1212837469539407',
+  actividad:    '1212837469550163',
+  priority:     '1206800982886832',
+  contactosAdicionales: '1215991631893795', // CONTACTOS ADICIONALES (text, JSON)
+};
+
+// PROYECTOS EXPANSIÓN custom fields (hardcoded GIDs from Asana)
+const PROJ_CF = {
+  inversion:  '1215963194518049', // INVERSION PREVISTA (€)
+  fees_eur:   '1215963194723545', // FEES NHOOD PREVISTOS (€)
+  m2:         '1215963282409212', // GLA / SBA (M2)
+  yoc:        '1215963464162696', // YOC (%)
+  tir:        '1215963430545068', // TIR / IRR (%)
+  yield_exit: '1215963283250767', // EXIT YIELD (%)
+  plazo:      '1215958573007625', // PLAZO (años)
+};
+// Fields stored as decimals in Asana (0.089) but displayed/entered as percentages (8.9)
+const PCT_FIELDS = new Set(['yoc', 'tir', 'yield_exit']);
+
+const ROL_OPTS = {
+  'PUBLIC ADMINISTRATION': '1211032537301611',
+  'INVESTORS':             '1211032537301612',
+  'OTHERS':                '1209595646960390',
+  'OPERATORS':             '1211730375861894',
+  'OWNER':                 '1211968955977952',
+};
+const NDA_OPTS = {
+  'Firmada NDA': '1211968953192783',
+  'No':          '1211968953192784',
+};
+
+const OPT_FIELDS = [
+  'gid','name','notes','completed','permalink_url',
+  'custom_fields','custom_fields.gid','custom_fields.type',
+  'custom_fields.text_value','custom_fields.enum_value','custom_fields.enum_value.gid',
+  'custom_fields.enum_value.name','custom_fields.multi_enum_values',
+  'custom_fields.multi_enum_values.gid','custom_fields.multi_enum_values.name',
+  'custom_fields.reference_value','custom_fields.reference_value.gid','custom_fields.reference_value.name',
+  'custom_fields.date_value','custom_fields.people_value','custom_fields.people_value.name','custom_fields.people_value.gid',
+  'memberships.section.name'
+].join(',');
+
+const PROJ_OPT_FIELDS = [
+  'gid','name','notes',
+  'custom_fields','custom_fields.gid','custom_fields.number_value',
+  'custom_fields.enum_value','custom_fields.enum_value.gid','custom_fields.enum_value.name'
+].join(',');
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let PAT          = localStorage.getItem('crm2_pat') || '';
+let tasks        = [];
+let extra        = JSON.parse(localStorage.getItem('crm2_extra') || '{}');
+let projCmts     = JSON.parse(localStorage.getItem('crm2_projcmts') || '{}'); // {[taskGid]:{[normProjName]:[{ts,text}]}}
+let projLog      = JSON.parse(localStorage.getItem('crm2_projlog')  || '{}'); // {[normProjName]:[{companyGid,companyName,status,date,notes}]}
+let projs        = JSON.parse(localStorage.getItem('crm2_projs') || '{}'); // localStorage fallback
+let projExpTasks = [];
+let lastSync     = null;
+let syncTimer    = null;
+let curView      = 'dashboard';
+let panelGid     = null;
+let panelType    = 'empresa';
+let panelTab     = 'info';
+let searchQ      = '';
+let filters      = { rol: '', actividad: '', fu: '' };
+let empSort      = { key: '', dir: 'asc' }; // ordenación tabla Empresas por encabezado
+let projFilter   = '';
+let showArchived = false;
+// {gid, name, options:[{gid,name}]} — discovered from PROYECTOS EXPANSIÓN custom fields
+let projStatusField = JSON.parse(localStorage.getItem('crm2_projstatusfield') || 'null');
+// task gid -> last comment text (Asana), cached in memory during session
+let lastCommentCache = {};
+// task gid -> Story[] full list, session cache cleared on each sync
+let storyCache = {};
+// Workspace users for the KEY ACCOUNT (people) field — [{gid,name}], cached in localStorage
+let users        = JSON.parse(localStorage.getItem('crm2_users') || '[]');
+let workspaceGid = localStorage.getItem('crm2_wsgid') || '';
+
+// ═══════════════════════════════════════════════
+// ASANA API
+// ═══════════════════════════════════════════════
+async function req(method, path, body) {
+  if (!PAT) throw new Error('Sin PAT configurado');
+  const opts = {
+    method,
+    headers: { Authorization: `Bearer ${PAT}`, 'Content-Type': 'application/json' }
+  };
+  if (body) opts.body = JSON.stringify({ data: body });
+  const r = await fetch(API + path, opts);
+  if (!r.ok) {
+    const j = await r.json().catch(() => ({}));
+    throw new Error(j.errors?.[0]?.message || `HTTP ${r.status}`);
+  }
+  return r.json();
+}
+
+async function fetchAllTasks() {
+  let all = [], offset = null;
+  do {
+    let url = `/projects/${PROJECT_GID}/tasks?limit=100&opt_fields=${OPT_FIELDS}`;
+    if (offset) url += `&offset=${encodeURIComponent(offset)}`;
+    const res = await req('GET', url);
+    all = all.concat(res.data || []);
+    offset = res.next_page?.offset || null;
+  } while (offset);
+  return all;
+}
+
+async function fetchProjExpTasks() {
+  let all = [], offset = null;
+  do {
+    let url = `/projects/${PROJ_EXP_GID}/tasks?limit=100&opt_fields=${PROJ_OPT_FIELDS}`;
+    if (offset) url += `&offset=${encodeURIComponent(offset)}`;
+    const res = await req('GET', url);
+    all = all.concat(res.data || []);
+    offset = res.next_page?.offset || null;
+  } while (offset);
+  return all;
+}
+
+async function fetchTask(gid) {
+  const res = await req('GET', `/tasks/${gid}?opt_fields=${OPT_FIELDS}`);
+  return res.data;
+}
+
+// Load workspace members for the KEY ACCOUNT (people) field. Cached in localStorage.
+async function loadUsers() {
+  if (!PAT) return;
+  try {
+    if (!workspaceGid) {
+      const proj = await req('GET', `/projects/${PROJECT_GID}?opt_fields=workspace.gid,workspace.name`);
+      workspaceGid = proj.data?.workspace?.gid || '';
+      if (workspaceGid) localStorage.setItem('crm2_wsgid', workspaceGid);
+    }
+    if (!workspaceGid) return;
+    let all = [], offset = null;
+    do {
+      let url = `/users?workspace=${workspaceGid}&limit=100&opt_fields=name`;
+      if (offset) url += `&offset=${encodeURIComponent(offset)}`;
+      const res = await req('GET', url);
+      all = all.concat(res.data || []);
+      offset = res.next_page?.offset || null;
+    } while (offset);
+    all.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    users = all;
+    localStorage.setItem('crm2_users', JSON.stringify(users));
+  } catch (_) { /* non-blocking; KEY ACCOUNT select falls back to current value */ }
+}
+
+async function patchTask(gid, body) {
+  await req('PUT', `/tasks/${gid}`, body);
+  const fresh = await fetchTask(gid);
+  const i = tasks.findIndex(t => t.gid === gid);
+  if (i >= 0) tasks[i] = fresh;
+  saveCache();
+  return fresh;
+}
+
+async function fetchStories(gid) {
+  const res = await req('GET', `/tasks/${gid}/stories?opt_fields=gid,text,created_at,created_by.name,type,resource_subtype`);
+  return (res.data || []).filter(s => s.type === 'comment');
+}
+
+async function postStory(gid, text) {
+  return req('POST', `/tasks/${gid}/stories`, { text });
+}
+
+async function uploadAttachment(taskGid, file) {
+  const form = new FormData();
+  form.append('parent', taskGid);
+  form.append('file', file, file.name);
+  const res = await fetch('https://app.asana.com/api/1.0/attachments', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${PAT}` },
+    body: form
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.errors?.[0]?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.data; // {gid, name, download_url, ...}
+}
+
+async function fetchStoriesCached(gid) {
+  if (!storyCache[gid]) storyCache[gid] = await fetchStories(gid);
+  return storyCache[gid];
+}
+
+// Last story from a company task that references projName via [Proyecto: X]
+function getLastProjStory(stories, projName) {
+  if (!stories || !stories.length) return null;
+  const pn = normProjName(projName);
+  const matching = stories.filter(s => {
+    const m = s.text?.match(/^\[Proyecto:\s*(.+?)\]/i);
+    return m && normProjName(m[1]) === pn;
+  });
+  return matching.length ? matching[matching.length - 1] : null;
+}
+
+// Last story from a project task that references companyName via [Empresa: X]
+function getLastCompanyStory(stories, companyName) {
+  if (!stories || !stories.length) return null;
+  const cn = companyName.trim().toLowerCase();
+  const matching = stories.filter(s => {
+    const m = s.text?.match(/^\[Empresa:\s*(.+?)\]/i);
+    return m && m[1].trim().toLowerCase() === cn;
+  });
+  return matching.length ? matching[matching.length - 1] : null;
+}
+
+async function createTask(name, customFields) {
+  const res = await req('POST', '/tasks', {
+    name,
+    projects: [PROJECT_GID],
+    custom_fields: customFields
+  });
+  return res.data;
+}
+
+// ═══════════════════════════════════════════════
+// CF ACCESSORS (CRM companies)
+// ═══════════════════════════════════════════════
+function cf(task, gid)      { return task.custom_fields?.find(f => f.gid === gid) || {}; }
+function cfText(task, gid)  { return cf(task, gid).text_value || ''; }
+function cfEnum(task, gid)  { return cf(task, gid).enum_value?.name || ''; }
+function cfEnumGid(task, gid) { return cf(task, gid).enum_value?.gid || ''; }
+function cfMulti(task, gid) { return (cf(task, gid).multi_enum_values || []).map(x => x.name); }
+// Reference fields (PROJECTS_PRESENTED / FOLLOW_UP / DECLINED) → tareas de PROYECTOS EXPANSIÓN
+function cfRefObjs(task, gid) { return cf(task, gid).reference_value || []; }          // [{gid,name}]
+function cfRef(task, gid)     { return cfRefObjs(task, gid).map(x => x.name); }         // [name]
+function cfDate(task, gid)  { const d = cf(task, gid).date_value; return (d && typeof d === 'object') ? (d.date || '') : (d || ''); }
+function cfPeople(task, gid){ return (cf(task, gid).people_value || []).map(x => x.name); }
+function cfPeopleGid(task, gid){ return (cf(task, gid).people_value || []).map(x => x.gid)[0] || ''; }
+
+// ═══════════════════════════════════════════════
+// PROYECTOS EXPANSIÓN HELPERS
+// ═══════════════════════════════════════════════
+function normProjName(n) {
+  return n.trim().toLowerCase()
+    .replace(/\s*\/\s*/g, '/')
+    .replace(/\s*-\s*/g, '-')
+    .replace(/\s+/g, ' ');
+}
+
+function lookupProjTask(name) {
+  const norm = normProjName(name);
+  return projExpTasks.find(t => normProjName(t.name) === norm) || null;
+}
+
+function projData(name) {
+  const task = lookupProjTask(name);
+  if (!task) return projs[name] || {};
+
+  const numVal = (cfGid) => {
+    if (!cfGid) return undefined;
+    const f = task.custom_fields?.find(x => x.gid === cfGid);
+    const v = f?.number_value;
+    return (v !== null && v !== undefined) ? v : undefined;
+  };
+
+  return {
+    descripcion: task.notes || undefined,
+    inversion:   numVal(PROJ_CF.inversion),
+    fees_eur:    numVal(PROJ_CF.fees_eur),
+    m2:          numVal(PROJ_CF.m2),
+    yoc:         numVal(PROJ_CF.yoc),
+    tir:         numVal(PROJ_CF.tir),
+    yield_exit:  numVal(PROJ_CF.yield_exit),
+    plazo:       numVal(PROJ_CF.plazo),
+  };
+}
+
+// ═══════════════════════════════════════════════
+// FOLLOW-UP HELPERS
+// ═══════════════════════════════════════════════
+function fuStatus(d) {
+  if (!d) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dt = new Date(d + 'T00:00:00');
+  const diff = Math.floor((dt - today) / 86400000);
+  if (diff < 0) return 'over';
+  if (diff === 0) return 'today';
+  if (diff <= 7) return 'soon';
+  return 'ok';
+}
+function fuBadge(d) {
+  const s = fuStatus(d);
+  if (!s) return '';
+  const map = { over: ['fub-over','Vencido'], today: ['fub-today','Hoy'], soon: ['fub-soon', d], ok: ['fub-ok', d] };
+  const [cls, lbl] = map[s];
+  return `<span class="fub ${cls}"><i class="ti ti-calendar" style="font-size:10px"></i>${lbl}</span>`;
+}
+function isUrgent(t) { return ['over','today','soon'].includes(fuStatus(cfDate(t, CF.dateFU))); }
+
+// ═══════════════════════════════════════════════
+// STYLING HELPERS
+// ═══════════════════════════════════════════════
+const ROL_CLS = {
+  'INVESTORS':'tag-blue','OPERATORS':'tag-green',
+  'PUBLIC ADMINISTRATION':'tag-red','OWNER':'tag-amber','OTHERS':'tag-gray'
+};
+function rolTag(name) {
+  return name ? `<span class="tag ${ROL_CLS[name]||'tag-gray'}">${e(name)}</span>` : '';
+}
+function initials(s) {
+  if (!s) return '?';
+  return s.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+}
+function e(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleString('es-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function fmtDateOnly(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtM(val) {
+  if (val === undefined || val === null || val === '') return null;
+  const n = parseFloat(val);
+  if (isNaN(n)) return null;
+  return n >= 1000000 ? (n/1000000).toFixed(1) + ' M€' : (n/1000).toFixed(0) + ' K€';
+}
+function fmtPct(val) {
+  if (val === undefined || val === null || val === '') return null;
+  const n = parseFloat(val);
+  return isNaN(n) ? null : (n * 100).toFixed(1) + '%';
+}
+// Returns HTML for a comment, highlighting [Proyecto: X] prefix and rendering attachment chips
+function formatCmtText(text) {
+  if (!text) return '';
+  let html = '';
+  const m = text.match(/^\[Proyecto:\s*(.+?)\]\n?([\s\S]*)$/);
+  const body = m ? m[2] : text;
+  if (m) {
+    html += `<span style="display:inline-block;background:var(--accent-l);color:var(--accent);border-radius:6px;padding:1px 7px;font-size:10px;font-weight:600;margin-bottom:3px"><i class="ti ti-building-skyscraper" style="font-size:10px;vertical-align:-1px"></i> ${e(m[1].trim())}</span><br>`;
+  }
+  // Split body into text parts and attachment tags
+  const parts = body.split(/(📎 [^\n]+\[ATTACH:[^\]]+\])/g);
+  parts.forEach(part => {
+    const am = part.match(/^📎 (.+?) \[ATTACH:([^\]]+)\]$/);
+    if (am) {
+      html += `<span class="att-chip" onclick="openAttachment('${e(am[2])}',this)"><i class="ti ti-paperclip"></i>${e(am[1])}</span>`;
+    } else {
+      html += e(part);
+    }
+  });
+  return html;
+}
+
+async function openAttachment(gid, el) {
+  el.classList.add('att-loading');
+  try {
+    const res = await req('GET', `/attachments/${gid}?opt_fields=download_url,permanent_url,view_url,name`);
+    const url = res.data?.download_url || res.data?.permanent_url || res.data?.view_url;
+    if (!url) throw new Error('URL no disponible');
+    window.open(url, '_blank');
+  } catch(err) {
+    toast('No se pudo abrir el archivo: ' + err.message, true);
+  } finally {
+    el.classList.remove('att-loading');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+const TITLES = { dashboard:'Dashboard', empresas:'Empresas', seguimiento:'Seguimiento', proyectos:'Proyectos', config:'Configuración' };
+
+function nav(v) {
+  curView = v; searchQ = '';
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-'+v)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') === `nav('${v}')`) n.classList.add('active');
+  });
+  document.getElementById('page-title').textContent = TITLES[v] || v;
+  const showSearch = v === 'empresas' || v === 'seguimiento';
+  document.getElementById('search-box').style.display = showSearch ? '' : 'none';
+  if (showSearch) document.getElementById('search-input').value = '';
+  document.getElementById('btn-sync').style.display = PAT && v !== 'config' ? '' : 'none';
+  document.getElementById('btn-add').style.display = v === 'empresas' && PAT ? '' : 'none';
+  if (v === 'proyectos') projFilter = '';
+  renderView();
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+
+// ═══════════════════════════════════════════════
+// RENDER DISPATCH
+// ═══════════════════════════════════════════════
+function renderView() {
+  if (curView === 'dashboard')        renderDashboard();
+  else if (curView === 'empresas')    renderEmpresas();
+  else if (curView === 'seguimiento') renderSeguimiento();
+  else if (curView === 'proyectos')   renderProyectos();
+  else if (curView === 'config')      renderConfig();
+}
+
+// ═══════════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════════
+function visible() {
+  let list = tasks.filter(t => !t.completed);
+  if (filters.rol)       list = list.filter(t => cfEnum(t, CF.rol) === filters.rol);
+  if (filters.actividad) list = list.filter(t => cfMulti(t, CF.actividad).includes(filters.actividad));
+  if (filters.fu === 'urgent') list = list.filter(t => isUrgent(t));
+  if (searchQ) {
+    const q = searchQ.toLowerCase();
+    list = list.filter(t =>
+      t.name.toLowerCase().includes(q) ||
+      cfText(t, CF.contacto).toLowerCase().includes(q) ||
+      cfText(t, CF.email).toLowerCase().includes(q) ||
+      cfEnum(t, CF.rol).toLowerCase().includes(q)
+    );
+  }
+  return list;
+}
+
+function onSearch(q) { searchQ = q; renderView(); }
+function setFilter(k, v) { filters[k] = filters[k] === v ? '' : v; renderView(); }
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  if (!tasks.length && !PAT) {
+    document.getElementById('kpi-row').innerHTML = '';
+    document.getElementById('dash-fu').innerHTML = `<div class="empty"><i class="ti ti-plug"></i>Conecta Asana en <button class="btn btn-sm" onclick="nav('config')">Configuración</button></div>`;
+    return;
+  }
+
+  const all   = tasks.filter(t => !t.completed);
+  const withFU = all.filter(t => cfDate(t, CF.dateFU));
+  const names  = allActiveProjectNames(); // archived projects excluded from dashboard
+
+  // ─ Fees per project ─
+  let feesTotal = 0;
+  const projFees = names.map(n => {
+    const d = projData(n);
+    const v = d.fees_eur;
+    const f = (v !== undefined && v !== null) ? parseFloat(v) : NaN;
+    if (!isNaN(f)) feesTotal += f;
+    return { name: n, fees: isNaN(f) ? null : f };
+  });
+  const maxFees = Math.max(...projFees.filter(p => p.fees !== null).map(p => p.fees), 1);
+
+  // ─ Active / inactive projects ─
+  const activeProjNames   = names.filter(n => { const c = companiesForProject(n); return c.fu.length || c.presented.length; });
+  const inactiveProjNames = names.filter(n => !activeProjNames.includes(n));
+
+  // ─ Companies with follow up, sorted by date ─
+  const fuCompanies = all
+    .filter(t => cfRef(t, CF.followUp).length)
+    .sort((a, b) => (cfDate(a, CF.dateFU)||'9999').localeCompare(cfDate(b, CF.dateFU)||'9999'));
+
+  // ─ Pending FUs by urgency category ─
+  const overdue  = withFU.filter(t => fuStatus(cfDate(t,CF.dateFU))==='over')
+    .sort((a,b) => cfDate(a,CF.dateFU).localeCompare(cfDate(b,CF.dateFU)));
+  const todayFU  = withFU.filter(t => fuStatus(cfDate(t,CF.dateFU))==='today');
+  const soonFU   = withFU.filter(t => fuStatus(cfDate(t,CF.dateFU))==='soon')
+    .sort((a,b) => cfDate(a,CF.dateFU).localeCompare(cfDate(b,CF.dateFU)));
+  const totalPending = overdue.length + todayFU.length + soonFU.length;
+
+  // ─ KPIs ─
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi"><div class="kpi-lbl">Fees totales previsibles</div><div class="kpi-val" style="color:var(--accent)">${feesTotal > 0 ? fmtM(feesTotal) : '—'}</div><div class="kpi-sub">suma fees nhood</div></div>
+    <div class="kpi"><div class="kpi-lbl">Proyectos activos</div><div class="kpi-val">${activeProjNames.length}</div><div class="kpi-sub">de ${names.length} en total</div></div>
+    <div class="kpi"><div class="kpi-lbl">Empresas en Follow Up</div><div class="kpi-val">${fuCompanies.length}</div><div class="kpi-sub">en seguimiento activo</div></div>
+    <div class="kpi"><div class="kpi-lbl">FU pendientes</div><div class="kpi-val" style="color:${totalPending?'var(--warn)':'var(--text)'}">${totalPending}</div><div class="kpi-sub">vencidos · hoy · 7 días</div></div>`;
+
+  // ─ Helper ─
+  const secHdr = (icon, color, title, badge, badgeStyle='') =>
+    `<div class="dash-section-hdr">
+      <div class="dash-section-title"><i class="${icon}" style="font-size:14px;color:${color}"></i> ${title}</div>
+      <span class="dash-section-count" style="${badgeStyle}">${badge}</span>
+    </div>`;
+
+  // ════ SECTION 1: Fees por proyecto ════
+  const projsWithFees = projFees.filter(p => p.fees !== null).sort((a,b) => b.fees - a.fees);
+  const projsNoFees   = projFees.filter(p => p.fees === null).sort((a,b) => a.name.localeCompare(b.name,'es'));
+
+  const feesRows = projsWithFees.map(p => {
+    const c   = companiesForProject(p.name);
+    const bar = Math.round((p.fees / maxFees) * 100);
+    const pills = [
+      c.fu.length        ? `<span class="tag tag-blue"  style="padding:1px 5px;font-size:9px">FU: ${c.fu.length}</span>` : '',
+      c.presented.length ? `<span class="tag tag-green" style="padding:1px 5px;font-size:9px">Pr: ${c.presented.length}</span>` : '',
+    ].filter(Boolean).join('');
+    return `<div class="dash-item" data-proj="${e(p.name)}" onclick="goToProject(this.dataset.proj)">
+      <div class="dash-item-name" title="${e(p.name)}">${e(p.name)}</div>
+      <div class="fees-bar-bg"><div class="fees-bar-fill" style="width:${bar}%"></div></div>
+      <div style="font-size:11px;font-weight:700;color:var(--accent);min-width:58px;text-align:right;flex-shrink:0">${fmtM(p.fees)}</div>
+      <div style="display:flex;gap:3px;flex-shrink:0;min-width:70px;justify-content:flex-end">${pills}</div>
+    </div>`;
+  }).join('');
+
+  const noFeesRows = projsNoFees.length ? `
+    <div class="dash-group-lbl" style="background:var(--bg2);color:var(--text3)">Sin fees definidos</div>
+    ${projsNoFees.map(p => {
+      const c = companiesForProject(p.name);
+      const pills = [
+        c.fu.length        ? `<span class="tag tag-blue"  style="padding:1px 5px;font-size:9px">FU: ${c.fu.length}</span>` : '',
+        c.presented.length ? `<span class="tag tag-green" style="padding:1px 5px;font-size:9px">Pr: ${c.presented.length}</span>` : '',
+      ].filter(Boolean).join('');
+      return `<div class="dash-item" style="opacity:.75" data-proj="${e(p.name)}" onclick="goToProject(this.dataset.proj)">
+        <div class="dash-item-name" title="${e(p.name)}">${e(p.name)}</div>
+        <div style="flex:1"></div>
+        <div style="font-size:11px;color:var(--text3);flex-shrink:0;min-width:58px;text-align:right">—</div>
+        <div style="display:flex;gap:3px;flex-shrink:0;min-width:70px;justify-content:flex-end">${pills}</div>
+      </div>`;
+    }).join('')}` : '';
+
+  const feesSection = `<div class="dash-section">
+    ${secHdr('ti ti-currency-euro','var(--accent)','Fees por proyecto',
+      projsWithFees.length ? fmtM(feesTotal) : '—',
+      projsWithFees.length ? 'background:var(--accent-l);color:var(--accent);font-weight:700' : '')}
+    <div class="dash-section-body">
+      ${feesRows || ''}
+      ${noFeesRows}
+      ${!projsWithFees.length && !projsNoFees.length ? '<div class="empty" style="padding:24px">Sin proyectos</div>' : ''}
+    </div>
+  </div>`;
+
+  // ════ SECTION 2: Proyectos activos ════
+  const activeProjRows = activeProjNames.map(n => {
+    const c    = companiesForProject(n);
+    const d    = projData(n);
+    const fees = (d.fees_eur !== undefined && d.fees_eur !== null) ? fmtM(d.fees_eur) : null;
+    return `<div class="dash-item" data-proj="${e(n)}" onclick="goToProject(this.dataset.proj)">
+      <div class="dash-item-name" title="${e(n)}">${e(n)}</div>
+      <div style="display:flex;gap:3px;flex-shrink:0">
+        ${c.fu.length        ? `<span class="tag tag-blue"  style="padding:1px 6px;font-size:9px">FU: ${c.fu.length}</span>` : ''}
+        ${c.presented.length ? `<span class="tag tag-green" style="padding:1px 6px;font-size:9px">Pr: ${c.presented.length}</span>` : ''}
+        ${c.declined.length  ? `<span class="tag tag-red"   style="padding:1px 6px;font-size:9px">Dc: ${c.declined.length}</span>` : ''}
+      </div>
+      ${fees ? `<div style="font-size:10px;font-weight:600;color:var(--accent);flex-shrink:0;min-width:50px;text-align:right">${fees}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  const inactiveProjRows = inactiveProjNames.length ? `
+    <div class="dash-group-lbl" style="background:var(--bg2);color:var(--text3)">Sin actividad (${inactiveProjNames.length})</div>
+    ${inactiveProjNames.map(n => `
+      <div class="dash-item" style="opacity:.55" data-proj="${e(n)}" onclick="goToProject(this.dataset.proj)">
+        <div class="dash-item-name" title="${e(n)}">${e(n)}</div>
+        <div style="flex:1"></div>
+        <span class="tag tag-gray" style="font-size:9px;padding:1px 6px">Sin empresas</span>
+      </div>`).join('')}` : '';
+
+  const activeProjsSection = `<div class="dash-section">
+    ${secHdr('ti ti-building-skyscraper','var(--ok)','Proyectos activos',
+      `${activeProjNames.length} / ${names.length}`,
+      activeProjNames.length ? 'background:var(--ok-bg);color:var(--ok)' : '')}
+    <div class="dash-section-body">
+      ${activeProjRows || '<div class="empty" style="padding:24px"><i class="ti ti-zzz"></i> Sin proyectos activos</div>'}
+      ${inactiveProjRows}
+    </div>
+  </div>`;
+
+  // ════ SECTION 3: Empresas en Follow Up ════
+  const fuRows = fuCompanies.map(t => {
+    const projs = cfRef(t, CF.followUp);
+    const fu    = cfDate(t, CF.dateFU);
+    return `<div class="dash-item" onclick="openPanel('${t.gid}')">
+      <div class="dash-item-name" title="${e(t.name)}">${e(t.name)}</div>
+      <div style="flex:1;min-width:0;overflow:hidden">
+        ${projs.slice(0,1).map(p =>
+          `<span class="tag tag-gray" style="padding:1px 5px;font-size:9px;cursor:pointer;max-width:100px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom"
+            data-proj="${e(p)}" onclick="event.stopPropagation();goToProject(this.dataset.proj)" title="${e(p)}">${e(p)}</span>`
+        ).join('')}
+        ${projs.length > 1 ? `<span style="font-size:9px;color:var(--text3)"> +${projs.length-1}</span>` : ''}
+      </div>
+      <div style="flex-shrink:0">${fuBadge(fu)||'<span style="font-size:10px;color:var(--text3)">Sin fecha</span>'}</div>
+    </div>`;
+  }).join('');
+
+  const fuSection = `<div class="dash-section">
+    ${secHdr('ti ti-users','var(--accent)','Empresas en Follow Up',
+      fuCompanies.length,
+      fuCompanies.length ? 'background:var(--accent-l);color:var(--accent)' : '')}
+    <div class="dash-section-body">
+      ${fuRows || '<div class="empty" style="padding:24px">Sin empresas en Follow Up</div>'}
+    </div>
+  </div>`;
+
+  // ════ SECTION 4: Follow-ups pendientes ════
+  const fuItemRow = t => {
+    const projs = cfRef(t, CF.followUp);
+    return `<div class="dash-item" onclick="openPanel('${t.gid}')">
+      <div class="dash-item-name" title="${e(t.name)}">${e(t.name)}</div>
+      <div style="flex:1;font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px">
+        ${projs.slice(0,2).map(p => e(p)).join(' · ')}${projs.length > 2 ? ` +${projs.length-2}` : ''}
+      </div>
+      <div style="flex-shrink:0">${fuBadge(cfDate(t, CF.dateFU))}</div>
+    </div>`;
+  };
+
+  const pendingSection = `<div class="dash-section">
+    ${secHdr('ti ti-alert-triangle','var(--err)','Follow-ups pendientes',
+      totalPending || '✓',
+      totalPending ? 'background:var(--err-bg);color:var(--err)' : 'background:var(--ok-bg);color:var(--ok)')}
+    <div class="dash-section-body">
+      ${!totalPending ? '<div class="empty" style="padding:24px"><i class="ti ti-circle-check"></i>Sin urgentes pendientes</div>' : ''}
+      ${overdue.length ? `
+        <div class="dash-group-lbl" style="background:var(--err-bg);color:var(--err)">Vencidos — ${overdue.length}</div>
+        ${overdue.map(fuItemRow).join('')}` : ''}
+      ${todayFU.length ? `
+        <div class="dash-group-lbl" style="background:var(--warn-bg);color:var(--warn)">Hoy — ${todayFU.length}</div>
+        ${todayFU.map(fuItemRow).join('')}` : ''}
+      ${soonFU.length ? `
+        <div class="dash-group-lbl" style="background:var(--accent-l);color:var(--accent)">Próximos 7 días — ${soonFU.length}</div>
+        ${soonFU.map(fuItemRow).join('')}` : ''}
+    </div>
+  </div>`;
+
+  document.getElementById('dash-fu').innerHTML =
+    `<div class="dash-grid">${feesSection}${activeProjsSection}${fuSection}${pendingSection}</div>`;
+}
+
+function fuCardHtml(t) {
+  const fps = cfRef(t, CF.followUp).slice(0,3);
+  return `<div class="fu-card" onclick="openPanel('${t.gid}')">
+    <div class="fu-main">
+      <div class="fu-company">${e(t.name)}</div>
+      <div class="fu-contact">${e(cfText(t,CF.contacto))}${cfText(t,CF.cargo)?` · ${e(cfText(t,CF.cargo))}`:''}</div>
+      ${fps.length ? `<div class="fu-projs">${fps.map(p=>`<span class="tag tag-gray tag-link" data-proj="${e(p)}" onclick="event.stopPropagation();goToProject(this.dataset.proj)" title="Ver proyecto «${e(p)}»">${e(p)}</span>`).join('')}</div>` : ''}
+    </div>
+    <div class="fu-meta">
+      ${fuBadge(cfDate(t,CF.dateFU))}
+      ${rolTag(cfEnum(t,CF.rol))}
+      ${cfPeople(t,CF.keyAccount)[0] ? `<span style="font-size:10px;color:var(--text2)">${e(cfPeople(t,CF.keyAccount)[0])}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+// EMPRESAS
+// ═══════════════════════════════════════════════
+const ROL_LIST = Object.keys(ROL_OPTS);
+const ACT_LIST = ['Hotel','Residencial','Comercial','PBSA','Living','Industrial','Oficinas','Otros','Residencias Ancianos'];
+
+// Columnas de la tabla Empresas (orden = el de la cabecera)
+const EMP_COLS = [
+  { key: 'name',      label: 'Empresa',            minw: 180 },
+  { key: 'contacto',  label: 'Contacto principal', minw: 150 },
+  { key: 'rol',       label: 'Rol',                minw: 110 },
+  { key: 'actividad', label: 'Actividad',          minw: 120 },
+  { key: 'fu',        label: 'Follow-up',          minw: 115 },
+  { key: 'ka',        label: 'Key Account',        minw: 100 },
+  { key: 'nda',       label: 'NDA',                minw: 60  },
+];
+
+// Valor de ordenación (string) por columna; cadena vacía = "sin dato" (va al final)
+function empSortVal(t, key) {
+  switch (key) {
+    case 'name':      return (t.name || '').toLowerCase();
+    case 'contacto':  return cfText(t, CF.contacto).toLowerCase();
+    case 'rol':       return cfEnum(t, CF.rol).toLowerCase();
+    case 'actividad': return cfMulti(t, CF.actividad).join(', ').toLowerCase();
+    case 'fu':        return cfDate(t, CF.dateFU) || ''; // 'YYYY-MM-DD' ordena lexicográficamente
+    case 'ka':        return (cfPeople(t, CF.keyAccount)[0] || '').toLowerCase();
+    case 'nda':       return cfEnum(t, CF.nda).toLowerCase();
+    default:          return '';
+  }
+}
+
+function sortEmp(key) {
+  if (empSort.key === key) empSort.dir = empSort.dir === 'asc' ? 'desc' : 'asc';
+  else { empSort.key = key; empSort.dir = 'asc'; }
+  renderEmpresas();
+}
+
+function renderEmpresas() {
+  const rolChips = ROL_LIST.map(r =>
+    `<button class="f-chip ${filters.rol===r?'on':''}" onclick="setFilter('rol','${r}')">${e(r)}</button>`
+  ).join('');
+  const actChips = ACT_LIST.map(a =>
+    `<button class="f-chip ${filters.actividad===a?'on':''}" onclick="setFilter('actividad','${e(a)}')">${e(a)}</button>`
+  ).join('');
+
+  document.getElementById('emp-filters').innerHTML =
+    `<button class="f-chip ${!filters.rol?'on':''}" onclick="setFilter('rol','')">Todos los roles</button>` + rolChips +
+    `<div class="f-sep"></div>` +
+    `<button class="f-chip ${!filters.actividad?'on':''}" onclick="setFilter('actividad','')">Toda actividad</button>` + actChips +
+    `<div class="f-sep"></div>` +
+    `<button class="f-chip ${filters.fu==='urgent'?'on':''}" onclick="setFilter('fu','urgent')"><i class="ti ti-alert-circle" style="font-size:12px;vertical-align:-1px"></i> Urgentes</button>`;
+
+  // Cabecera con ordenación por columna
+  const arrow = key => empSort.key === key
+    ? `<i class="ti ti-arrow-${empSort.dir === 'asc' ? 'up' : 'down'}" style="font-size:12px;vertical-align:-2px;margin-left:3px;color:var(--accent)"></i>`
+    : `<i class="ti ti-arrows-sort" style="font-size:12px;vertical-align:-2px;margin-left:3px;color:var(--text3)"></i>`;
+  document.getElementById('emp-thead').innerHTML = EMP_COLS.map(col =>
+    `<th style="min-width:${col.minw}px;cursor:pointer;user-select:none" onclick="sortEmp('${col.key}')" title="Ordenar por ${e(col.label)}">${e(col.label)}${arrow(col.key)}</th>`
+  ).join('');
+
+  let list = visible();
+  if (empSort.key) {
+    const dir = empSort.dir === 'asc' ? 1 : -1;
+    list = list.slice().sort((a, b) => {
+      const av = empSortVal(a, empSort.key), bv = empSortVal(b, empSort.key);
+      if (av === '' && bv !== '') return 1;   // vacíos siempre al final
+      if (bv === '' && av !== '') return -1;
+      return dir * av.localeCompare(bv, 'es', { numeric: true, sensitivity: 'base' });
+    });
+  }
+  document.getElementById('b-empresas').textContent = tasks.filter(t=>!t.completed).length || '–';
+
+  if (!list.length && !PAT) {
+    document.getElementById('emp-tbody').innerHTML = `<tr><td colspan="7"><div class="empty"><i class="ti ti-plug"></i>Conecta Asana en <button class="btn btn-sm" onclick="nav('config')">Configuración</button></div></td></tr>`;
+    return;
+  }
+  if (!list.length) {
+    document.getElementById('emp-tbody').innerHTML = `<tr><td colspan="7"><div class="empty">Sin resultados</div></td></tr>`;
+    return;
+  }
+
+  document.getElementById('emp-tbody').innerHTML = list.map(t => {
+    const contacto = cfText(t, CF.contacto);
+    const cargo    = cfText(t, CF.cargo);
+    const rol      = cfEnum(t, CF.rol);
+    const acts     = cfMulti(t, CF.actividad).slice(0,2);
+    const fu       = cfDate(t, CF.dateFU);
+    const ka       = cfPeople(t, CF.keyAccount)[0] || '';
+    const nda      = cfEnum(t, CF.nda);
+    const extra_n  = (extra[t.gid]||[]).length;
+    return `<tr onclick="openPanel('${t.gid}')">
+      <td>
+        <div style="font-weight:600;font-size:12px">${e(t.name)}</div>
+        ${cfText(t,CF.webLinkedin)?`<div style="font-size:10px;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">${e(cfText(t,CF.webLinkedin))}</div>`:''}
+      </td>
+      <td>
+        <div style="font-weight:500;font-size:12px">${e(contacto)||'—'}</div>
+        <div class="td-sm">${e(cargo)}${extra_n?` <span class="tag tag-gray">+${extra_n}</span>`:''}</div>
+      </td>
+      <td>${rolTag(rol)||'<span style="color:var(--text3)">—</span>'}</td>
+      <td>${acts.map(a=>`<span class="tag tag-gray">${e(a)}</span>`).join(' ')||'<span style="color:var(--text3)">—</span>'}</td>
+      <td>${fuBadge(fu)||'<span style="color:var(--text3)">—</span>'}</td>
+      <td class="td-sm td-clip">${e(ka)||'—'}</td>
+      <td>${nda==='Firmada NDA'?'<span class="tag tag-green">✓ NDA</span>':'<span style="color:var(--text3)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════
+// SEGUIMIENTO
+// ═══════════════════════════════════════════════
+function renderSeguimiento() {
+  // Solo empresas con follow up: con proyecto en Follow Up o con fecha de follow up
+  const all = visible().filter(t => cfRef(t, CF.followUp).length || cfDate(t, CF.dateFU));
+  const withFU = all.filter(t => cfDate(t, CF.dateFU));
+  const urgentCount = withFU.filter(t => isUrgent(t)).length;
+  document.getElementById('b-fu').textContent = urgentCount || '–';
+
+  document.getElementById('seg-filters').innerHTML = [
+    `<button class="f-chip ${filters.fu==='urgent'?'on':''}" onclick="setFilter('fu','urgent')">Solo urgentes</button>`,
+    `<button class="f-chip ${!filters.fu?'on':''}" onclick="setFilter('fu','')">Todos</button>`,
+  ].join('');
+
+  const byProj = {};
+  const noProjItems = [];
+  all.forEach(t => {
+    const fps = cfRef(t, CF.followUp);
+    if (!fps.length) { noProjItems.push(t); return; }
+    fps.forEach(p => { if (!byProj[p]) byProj[p]=[]; byProj[p].push(t); });
+  });
+
+  const sortTasks = arr => arr.sort((a,b) => {
+    const da = cfDate(a,CF.dateFU)||'9999', db = cfDate(b,CF.dateFU)||'9999';
+    return da.localeCompare(db);
+  });
+
+  let html = '';
+  Object.keys(byProj).sort().forEach(p => {
+    const items = sortTasks(byProj[p]);
+    html += `<div style="margin-bottom:18px">
+      <div class="sec-hdr">
+        <div class="sec-title sec-link" data-proj="${e(p)}" onclick="goToProject(this.dataset.proj)" title="Ver proyecto «${e(p)}»"><i class="ti ti-building-skyscraper" style="vertical-align:-2px;margin-right:5px;color:var(--text2)"></i>${e(p)} <i class="ti ti-arrow-right" style="font-size:13px;color:var(--text3);vertical-align:-1px"></i></div>
+        <span class="nbadge">${items.length}</span>
+      </div>
+      ${items.map(fuCardHtml).join('')}
+    </div>`;
+  });
+  if (noProjItems.length) {
+    html += `<div style="margin-bottom:18px">
+      <div class="sec-hdr"><div class="sec-title" style="color:var(--text2)">Con fecha de follow up · sin proyecto</div><span class="nbadge">${noProjItems.length}</span></div>
+      ${sortTasks(noProjItems).map(fuCardHtml).join('')}
+    </div>`;
+  }
+  if (!html) html = '<div class="empty"><i class="ti ti-calendar-off"></i>Sin empresas en seguimiento</div>';
+  document.getElementById('seg-content').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════
+// CONFIG VIEW
+// ═══════════════════════════════════════════════
+function renderConfig() {
+  const inp = document.getElementById('cfg-pat');
+  if (inp && PAT) inp.value = PAT;
+  const st = document.getElementById('cfg-status');
+  if (st) st.innerHTML = PAT
+    ? `<span style="color:var(--ok)">✓ Conectado</span> · ${tasks.length} empresas · ${projExpTasks.length} proyectos Asana · Última sync: ${lastSync ? lastSync.toLocaleTimeString() : 'nunca'}`
+    : 'Sin conectar.';
+  const pjSt = document.getElementById('cfg-proj-status');
+  if (pjSt) pjSt.innerHTML = projExpTasks.length
+    ? `<span style="color:var(--ok)">✓ ${projExpTasks.length} proyectos cargados de Asana</span>`
+    : PAT ? 'Sincroniza para cargar los proyectos.' : '';
+}
+
+async function connectAsana() {
+  const inp = document.getElementById('cfg-pat');
+  const pat = inp?.value.trim();
+  if (!pat) { toast('Introduce el PAT', true); return; }
+  PAT = pat;
+  localStorage.setItem('crm2_pat', PAT);
+  const st = document.getElementById('cfg-status');
+  if (st) st.textContent = 'Conectando…';
+  try {
+    await syncNow();
+    renderConfig();
+    toast('Conectado y sincronizado');
+    if (!syncTimer) startAutoSync();
+  } catch(err) {
+    PAT = '';
+    localStorage.removeItem('crm2_pat');
+    if (st) st.textContent = 'Error: ' + err.message;
+    toast(err.message, true);
+  }
+}
+
+function disconnectAsana() {
+  PAT = '';
+  localStorage.removeItem('crm2_pat');
+  tasks = []; projExpTasks = [];
+  clearInterval(syncTimer); syncTimer = null;
+  document.getElementById('btn-sync').style.display = 'none';
+  document.getElementById('btn-add').style.display = 'none';
+  renderConfig();
+  toast('Desconectado');
+}
+
+// ═══════════════════════════════════════════════
+// SYNC
+// ═══════════════════════════════════════════════
+function saveCache() {
+  localStorage.setItem('crm2_cache', JSON.stringify({ ts: Date.now(), tasks }));
+}
+function saveProjCache() {
+  localStorage.setItem('crm2_projexp', JSON.stringify({ ts: Date.now(), tasks: projExpTasks }));
+}
+
+async function syncNow() {
+  if (!PAT) { nav('config'); return; }
+  const si = document.getElementById('sync-info');
+  si.textContent = 'Sincronizando…';
+  const btn = document.getElementById('btn-sync');
+  if (btn) btn.disabled = true;
+  try {
+    [tasks, projExpTasks] = await Promise.all([fetchAllTasks(), fetchProjExpTasks()]);
+    syncExtraFromAsana(tasks);
+    if (!users.length || !workspaceGid) loadUsers(); // non-blocking; populate KEY ACCOUNT options
+    discoverProjStatusField(); // non-blocking; discover status enum field in PROYECTOS EXPANSIÓN
+    lastCommentCache = {}; // invalidate cached last comments on each sync
+    storyCache = {};
+    lastSync = new Date();
+    saveCache();
+    saveProjCache();
+    si.textContent = 'Sync ' + lastSync.toLocaleTimeString();
+    updateBadges();
+    renderView();
+  } catch(err) {
+    si.textContent = 'Error sync';
+    toast('Sync error: ' + err.message, true);
+    throw err;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function startAutoSync() {
+  clearInterval(syncTimer);
+  syncTimer = setInterval(syncNow, SYNC_MS);
+}
+
+function updateBadges() {
+  const all = tasks.filter(t => !t.completed);
+  document.getElementById('b-empresas').textContent = all.length || '–';
+  document.getElementById('b-fu').textContent = all.filter(t => isUrgent(t)).length || '–';
+  document.getElementById('b-projs').textContent = allActiveProjectNames().length || '–';
+}
+
+// ═══════════════════════════════════════════════
+// DETAIL PANEL — EMPRESA
+// ═══════════════════════════════════════════════
+function openPanel(gid) {
+  const task = tasks.find(t => t.gid === gid);
+  if (!task) return;
+  panelType = 'empresa';
+  panelGid = gid;
+
+  document.getElementById('panel-title').textContent = task.name;
+  document.getElementById('panel-sub').textContent = task.memberships?.[0]?.section?.name || '';
+  document.getElementById('panel-tags').innerHTML = [
+    rolTag(cfEnum(task, CF.rol)),
+    ...cfMulti(task, CF.actividad).map(a => `<span class="tag tag-blue">${e(a)}</span>`),
+    ...cfMulti(task, CF.localizacion).map(l => `<span class="tag tag-gray">${e(l)}</span>`),
+  ].join('');
+
+  document.getElementById('panel-tabs').innerHTML = `
+    <div class="p-tab active" onclick="switchTab('info')">Información</div>
+    <div class="p-tab" onclick="switchTab('contactos')">Contactos</div>
+    <div class="p-tab" onclick="switchTab('proyectos')">Proyectos</div>
+    <div class="p-tab" onclick="switchTab('actividad')">Actividad</div>`;
+  panelTab = 'info';
+  renderPanelInfo(task);
+
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('panel-overlay').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('panel-overlay').classList.remove('open');
+  panelGid = null;
+}
+
+function switchTab(tab) {
+  if (panelType !== 'empresa') return;
+  panelTab = tab;
+  const tabs = ['info','contactos','proyectos','actividad'];
+  document.querySelectorAll('#panel-tabs .p-tab').forEach((el,i) => el.classList.toggle('active', tabs[i]===tab));
+  const task = tasks.find(t => t.gid === panelGid);
+  if (!task) return;
+  if (tab === 'info')           renderPanelInfo(task);
+  else if (tab === 'contactos') renderPanelContactos(task);
+  else if (tab === 'proyectos') renderPanelProyectos(task);
+  else if (tab === 'actividad') renderPanelActividad(task);
+}
+
+function renderPanelInfo(task, editMode = false) {
+  const dash = '<span style="color:var(--text3)">—</span>';
+  const lbl = (label, asanaKey, content) =>
+    `<div class="form-group">
+      <label class="form-label">${label} <span class="form-asana">· ${asanaKey}</span></label>
+      ${content}
+    </div>`;
+  const disp = (label, asanaKey, val) =>
+    lbl(label, asanaKey, `<div class="info-val">${val || dash}</div>`);
+
+  if (!editMode) {
+    // ── READ-ONLY MODE ──
+    const fu = cfDate(task, CF.dateFU);
+    const ka = cfPeople(task, CF.keyAccount)[0] || '';
+    const emailVal = cfText(task, CF.email);
+    const emailDisp = emailVal
+      ? `<a href="mailto:${e(emailVal)}" style="color:var(--accent);text-decoration:none">${e(emailVal)}</a>`
+      : '';
+
+    document.getElementById('panel-body').innerHTML = `
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="btn btn-primary btn-sm" onclick="renderPanelInfo(tasks.find(t=>t.gid==='${task.gid}'),true)">
+          <i class="ti ti-pencil"></i> Editar
+        </button>
+      </div>
+      <div class="form-row">
+        ${disp('Contacto principal','CONTACTO', e(cfText(task,CF.contacto)))}
+        ${disp('Cargo','CARGO DEL CONTACTO', e(cfText(task,CF.cargo)))}
+      </div>
+      <div class="form-row">
+        ${lbl('Email','EMAIL', `<div class="info-val">${emailDisp || dash}</div>`)}
+        ${disp('Teléfono','TELEFONO', e(cfText(task,CF.telefono)))}
+      </div>
+      <div class="form-row">
+        ${disp('Web / LinkedIn','Web/Linkedin', e(cfText(task,CF.webLinkedin)))}
+        ${disp('NDA','NDA', e(cfEnum(task,CF.nda)))}
+      </div>
+      <div class="form-row">
+        ${disp('Próximo follow-up','DATE FOLLOW UP', fu ? fmtDate(fu + 'T00:00:00') : '')}
+        ${disp('Rol','ROL', e(cfEnum(task,CF.rol)))}
+      </div>
+      <div class="form-row">
+        ${disp('Key Account','KEY ACCOUNT', e(ka))}
+        <div></div>
+      </div>
+      ${lbl('Notas último contacto','notas ultimo contaco',
+        `<div class="info-val" style="white-space:pre-wrap">${e(cfText(task,CF.notasUltimo)) || dash}</div>`)}
+      ${lbl('Descripción / Notas','notes',
+        `<div class="info-val" style="white-space:pre-wrap;min-height:60px">${e(task.notes||'') || dash}</div>`)}
+      <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
+        <a href="${task.permalink_url}" target="_blank" class="btn btn-sm"><i class="ti ti-external-link"></i> Abrir en Asana</a>
+        <button class="btn btn-sm btn-danger" onclick="deleteEmpresa('${task.gid}')">
+          <i class="ti ti-trash"></i> Eliminar empresa
+        </button>
+      </div>`;
+    return;
+  }
+
+  // ── EDIT MODE ──
+  const inp = (label, asanaKey, val, field, type='text', extraAttr='') =>
+    lbl(label, asanaKey,
+      `<input class="form-input" value="${e(val)}" data-gid="${task.gid}" data-field="${field}" data-type="${type}" onblur="saveField(this)" ${extraAttr}>`);
+
+  const sel = (label, asanaKey, opts, current, field) =>
+    lbl(label, asanaKey,
+      `<select class="form-input form-select" data-gid="${task.gid}" data-field="${field}" data-type="enum" onchange="saveField(this)">
+        <option value="">—</option>
+        ${Object.entries(opts).map(([name,gid]) => `<option value="${gid}" ${current===name?'selected':''}>${e(name)}</option>`).join('')}
+      </select>`);
+
+  const peopleSel = (label, asanaKey, field) => {
+    const curGid  = cfPeopleGid(task, field);
+    const curName = cfPeople(task, field)[0] || '';
+    const opts = users.length ? users : (curGid ? [{ gid: curGid, name: curName }] : []);
+    const hasCur = !curGid || opts.some(u => u.gid === curGid);
+    return lbl(label, asanaKey,
+      `<select class="form-input form-select" data-gid="${task.gid}" data-field="${field}" data-type="people" onchange="saveField(this)">
+        <option value="">—</option>
+        ${!hasCur ? `<option value="${curGid}" selected>${e(curName)}</option>` : ''}
+        ${opts.map(u => `<option value="${u.gid}" ${curGid===u.gid?'selected':''}>${e(u.name)}</option>`).join('')}
+      </select>`);
+  };
+
+  document.getElementById('panel-body').innerHTML = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-sm" onclick="renderPanelInfo(tasks.find(t=>t.gid==='${task.gid}'),false)">
+        <i class="ti ti-x"></i> Cerrar edición
+      </button>
+    </div>
+    <div class="form-row">
+      ${inp('Contacto principal','CONTACTO', cfText(task,CF.contacto), CF.contacto)}
+      ${inp('Cargo','CARGO DEL CONTACTO', cfText(task,CF.cargo), CF.cargo)}
+    </div>
+    <div class="form-row">
+      ${inp('Email','EMAIL', cfText(task,CF.email), CF.email, 'text', 'type="email"')}
+      ${inp('Teléfono','TELEFONO', cfText(task,CF.telefono), CF.telefono)}
+    </div>
+    <div class="form-row">
+      ${inp('Web / LinkedIn','Web/Linkedin', cfText(task,CF.webLinkedin), CF.webLinkedin)}
+      ${sel('NDA','NDA', NDA_OPTS, cfEnum(task,CF.nda), CF.nda)}
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Próximo follow-up <span class="form-asana">· DATE FOLLOW UP</span></label>
+        <input class="form-input" type="date" value="${e(cfDate(task,CF.dateFU))}" data-gid="${task.gid}" data-field="${CF.dateFU}" data-type="date" onchange="saveField(this)">
+      </div>
+      ${sel('Rol','ROL', ROL_OPTS, cfEnum(task,CF.rol), CF.rol)}
+    </div>
+    <div class="form-row">
+      ${peopleSel('Key Account','KEY ACCOUNT', CF.keyAccount)}
+      <div></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notas último contacto <span class="form-asana">· notas ultimo contaco</span></label>
+      <textarea class="form-input" data-gid="${task.gid}" data-field="${CF.notasUltimo}" data-type="text" onblur="saveField(this)">${e(cfText(task,CF.notasUltimo))}</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción / Notas <span class="form-asana">· notes</span></label>
+      <textarea class="form-input" rows="4" data-gid="${task.gid}" data-field="notes" data-type="notes" onblur="saveField(this)">${e(task.notes||'')}</textarea>
+    </div>
+    <a href="${task.permalink_url}" target="_blank" class="btn btn-sm" style="margin-top:4px"><i class="ti ti-external-link"></i> Abrir en Asana</a>
+  `;
+}
+
+function renderPanelContactos(task) {
+  const primary = {
+    nombre: cfText(task,CF.contacto), cargo: cfText(task,CF.cargo),
+    email: cfText(task,CF.email), tel: cfText(task,CF.telefono), primary: true
+  };
+  const extras = extra[task.gid] || [];
+  const all = [primary, ...extras];
+
+  document.getElementById('panel-body').innerHTML = `
+    <div class="sec-hdr" style="margin-bottom:10px">
+      <div class="sec-title">Contactos (${all.length})</div>
+      <button class="btn btn-sm" onclick="showAddContactForm('${task.gid}')"><i class="ti ti-plus"></i> Añadir</button>
+    </div>
+    ${all.map((c,i) => `
+      <div class="contact-item" id="contact-item-${i}">
+        <div class="c-avatar">${initials(c.nombre)}</div>
+        <div class="c-info">
+          <div class="c-name">${e(c.nombre)||'—'} ${c.primary?'<span class="tag tag-blue" style="font-size:9px;padding:1px 5px">Principal · Asana</span>':''}</div>
+          <div class="c-role">${[c.cargo, c.email ? `<a href="mailto:${e(c.email)}" onclick="event.stopPropagation()" style="color:var(--accent);text-decoration:none" title="Enviar correo">${e(c.email)}</a>` : '', c.tel].filter(Boolean).join(' · ')||'Sin datos'}</div>
+        </div>
+        ${!c.primary ? `
+          <button class="btn btn-icon btn-sm" onclick="showEditContactForm('${task.gid}',${i-1})" title="Editar"><i class="ti ti-pencil" style="font-size:12px"></i></button>
+          <button class="btn btn-icon btn-sm" onclick="removeContact('${task.gid}',${i-1})" title="Eliminar"><i class="ti ti-x" style="font-size:12px;color:var(--err)"></i></button>
+        ` : ''}
+      </div>`).join('')}
+    <div id="contact-form-wrap" style="margin-top:10px"></div>`;
+}
+
+function contactFormHtml(gid, saveHandler, cancelHandler, c) {
+  const val = f => c ? e(c[f]) : '';
+  return `
+    <div style="background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rads);padding:12px">
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:8px"><label class="form-label">Nombre</label><input class="form-input" id="ec-n" placeholder="Nombre completo" value="${val('nombre')}"></div>
+        <div class="form-group" style="margin-bottom:8px"><label class="form-label">Cargo</label><input class="form-input" id="ec-c" placeholder="Cargo o puesto" value="${val('cargo')}"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:8px"><label class="form-label">Email</label><input class="form-input" id="ec-e" type="email" value="${val('email')}"></div>
+        <div class="form-group" style="margin-bottom:8px"><label class="form-label">Teléfono</label><input class="form-input" id="ec-t" value="${val('tel')}"></div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-primary btn-sm" onclick="${saveHandler}">Guardar</button>
+        <button class="btn btn-sm" onclick="${cancelHandler}">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+function showAddContactForm(gid) {
+  document.getElementById('contact-form-wrap').innerHTML =
+    contactFormHtml(gid, `saveContact('${gid}')`, `document.getElementById('contact-form-wrap').innerHTML=''`, null);
+}
+
+function showEditContactForm(gid, idx) {
+  const c = (extra[gid] || [])[idx];
+  if (!c) return;
+  document.getElementById('contact-form-wrap').innerHTML =
+    contactFormHtml(gid, `updateContact('${gid}',${idx})`, `document.getElementById('contact-form-wrap').innerHTML=''`, c);
+  document.getElementById('contact-form-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function updateContact(gid, idx) {
+  if (!extra[gid] || !extra[gid][idx]) return;
+  const nombre = document.getElementById('ec-n').value.trim();
+  if (!nombre) { toast('El nombre es obligatorio', true); return; }
+  extra[gid][idx] = {
+    ...extra[gid][idx],
+    nombre,
+    cargo: document.getElementById('ec-c').value.trim(),
+    email: document.getElementById('ec-e').value.trim(),
+    tel:   document.getElementById('ec-t').value.trim(),
+  };
+  localStorage.setItem('crm2_extra', JSON.stringify(extra));
+  pushExtraToAsana(gid).catch(err => toast('Error guardando en Asana: ' + err.message, true));
+  const task = tasks.find(t => t.gid === gid);
+  if (task) renderPanelContactos(task);
+  toast('Contacto actualizado');
+}
+
+// ── Extra contacts ↔ Asana helpers ──
+function serializeExtraContacts(list) {
+  return list && list.length ? JSON.stringify(list) : '';
+}
+function parseExtraContacts(str) {
+  if (!str) return [];
+  try { return JSON.parse(str) || []; } catch { return []; }
+}
+async function pushExtraToAsana(gid) {
+  const val = serializeExtraContacts(extra[gid] || []);
+  await patchTask(gid, { custom_fields: { [CF.contactosAdicionales]: val } });
+}
+// Called after fetchAllTasks: reads Asana field and updates extra[]; migrates localStorage → Asana if field empty
+function syncExtraFromAsana(fetchedTasks) {
+  for (const t of fetchedTasks) {
+    const asanaVal = cfText(t, CF.contactosAdicionales);
+    if (asanaVal) {
+      extra[t.gid] = parseExtraContacts(asanaVal);
+    } else if (extra[t.gid] && extra[t.gid].length) {
+      // Migrate existing localStorage contacts to Asana (non-blocking, silent on error)
+      pushExtraToAsana(t.gid).catch(() => {});
+    }
+  }
+  localStorage.setItem('crm2_extra', JSON.stringify(extra));
+}
+
+function saveContact(gid) {
+  const c = {
+    id: Date.now(),
+    nombre: document.getElementById('ec-n').value.trim(),
+    cargo:  document.getElementById('ec-c').value.trim(),
+    email:  document.getElementById('ec-e').value.trim(),
+    tel:    document.getElementById('ec-t').value.trim(),
+  };
+  if (!c.nombre) { toast('El nombre es obligatorio', true); return; }
+  if (!extra[gid]) extra[gid] = [];
+  extra[gid].push(c);
+  localStorage.setItem('crm2_extra', JSON.stringify(extra));
+  pushExtraToAsana(gid).catch(err => toast('Error guardando en Asana: ' + err.message, true));
+  const task = tasks.find(t => t.gid === gid);
+  if (task) renderPanelContactos(task);
+  toast('Contacto añadido');
+}
+
+function removeContact(gid, idx) {
+  if (!extra[gid] || idx < 0) return;
+  extra[gid].splice(idx, 1);
+  localStorage.setItem('crm2_extra', JSON.stringify(extra));
+  pushExtraToAsana(gid).catch(err => toast('Error guardando en Asana: ' + err.message, true));
+  const task = tasks.find(t => t.gid === gid);
+  if (task) renderPanelContactos(task);
+}
+
+async function deleteEmpresa(gid) {
+  const name = (tasks.find(t => t.gid === gid) || {}).name || gid;
+  const ok = confirm(
+    `¿Eliminar "${name}"?\n\nEsta empresa se eliminará permanentemente de Asana y no podrá recuperarse.`
+  );
+  if (!ok) return;
+  try {
+    await req('DELETE', `/tasks/${gid}`);
+    tasks = tasks.filter(t => t.gid !== gid);
+    delete extra[gid];
+    localStorage.setItem('crm2_extra', JSON.stringify(extra));
+    saveCache();
+    if (panelGid === gid) closePanel();
+    updateBadges();
+    renderEmpresas();
+    toast(`"${name}" eliminada de Asana`);
+  } catch(err) {
+    toast('Error al eliminar: ' + err.message, true);
+  }
+}
+
+// ── Per-project company log (localStorage crm2_projlog) ──
+function saveProjLog() { localStorage.setItem('crm2_projlog', JSON.stringify(projLog)); }
+function getProjLog(projName) { return projLog[normProjName(projName)] || []; }
+function getCompanyLog(projName, companyGid) {
+  return getProjLog(projName).find(en => en.companyGid === companyGid) || null;
+}
+function upsertLogEntry(projName, companyGid, companyName, status, date, notes) {
+  const key = normProjName(projName);
+  if (!projLog[key]) projLog[key] = [];
+  const idx = projLog[key].findIndex(en => en.companyGid === companyGid);
+  const entry = { companyGid, companyName, status, date: date || todayStr(), notes: notes || '' };
+  if (idx >= 0) Object.assign(projLog[key][idx], entry);
+  else projLog[key].push(entry);
+  saveProjLog();
+}
+function removeLogEntry(projName, companyGid) {
+  const key = normProjName(projName);
+  if (!projLog[key]) return;
+  projLog[key] = projLog[key].filter(en => en.companyGid !== companyGid);
+  saveProjLog();
+}
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+
+// ── Per-company per-project comments (localStorage crm2_projcmts) ──
+function saveProjCmts() { localStorage.setItem('crm2_projcmts', JSON.stringify(projCmts)); }
+function getProjCmts(gid, projName) {
+  const k = normProjName(projName);
+  return (projCmts[gid] && projCmts[gid][k]) ? projCmts[gid][k] : [];
+}
+function addProjCmt(gid, projName, text) {
+  text = (text || '').trim();
+  if (!text) return;
+  const k = normProjName(projName);
+  if (!projCmts[gid]) projCmts[gid] = {};
+  if (!projCmts[gid][k]) projCmts[gid][k] = [];
+  projCmts[gid][k].push({ ts: Date.now(), text });
+  saveProjCmts();
+}
+function delProjCmt(gid, projName, ts) {
+  const k = normProjName(projName);
+  if (projCmts[gid] && projCmts[gid][k]) {
+    projCmts[gid][k] = projCmts[gid][k].filter(c => c.ts !== ts);
+    if (!projCmts[gid][k].length) delete projCmts[gid][k];
+    if (projCmts[gid] && !Object.keys(projCmts[gid]).length) delete projCmts[gid];
+    saveProjCmts();
+  }
+}
+function projCmtsHtml(gid, projName) {
+  const list = getProjCmts(gid, projName).slice().sort((a, b) => b.ts - a.ts);
+  const items = list.length
+    ? list.map(c => `<div class="pc-item">
+        <div class="pc-body">
+          <span class="pc-date">${fmtDate(new Date(c.ts).toISOString())}</span>
+          <span class="pc-txt">${e(c.text)}</span>
+        </div>
+        <button class="pc-del" title="Eliminar comentario" onclick="onProjCmtDel(this)" data-ts="${c.ts}"><i class="ti ti-x"></i></button>
+      </div>`).join('')
+    : '<div class="pc-empty">Sin comentarios de presentación todavía.</div>';
+  return `<div class="pc-wrap">
+    ${items}
+    <div class="pc-compose">
+      <textarea class="form-input" placeholder="Comentario de la presentación a esta empresa…" rows="1"></textarea>
+      <button class="btn btn-primary btn-sm" onclick="onProjCmtAdd(this)"><i class="ti ti-plus"></i></button>
+    </div>
+  </div>`;
+}
+
+// Cross-posts comment to Asana: company task + project task
+async function onProjCmtAdd(btn) {
+  const row = btn.closest('.proj-edit-row');
+  const ta = row.querySelector('.pc-compose textarea');
+  const fileInput = row.querySelector('.proj-row-file');
+  const file = fileInput?.files?.[0];
+  const gid = panelGid, projName = row.dataset.proj;
+  const text = ta?.value.trim();
+  if (!text && !file) return;
+  btn.disabled = true;
+  try {
+    let attTag = '';
+    if (file) {
+      toast('Subiendo archivo…');
+      const att = await uploadAttachment(gid, file);
+      attTag = `\n📎 ${att.name} [ATTACH:${att.gid}]`;
+    }
+    const task = tasks.find(t => t.gid === gid);
+    const companyName = task ? task.name : gid;
+    const fullText = text + attTag;
+    await postStory(gid, `[Proyecto: ${projName}]\n${fullText}`);
+    const projTask = lookupProjTask(projName);
+    if (projTask) await postStory(projTask.gid, `[Empresa: ${companyName}]\n${fullText}`);
+    delete storyCache[gid];
+    if (projTask) delete storyCache[projTask.gid];
+    ta.value = '';
+    if (fileInput) fileInput.value = '';
+    const prevWrap = row.querySelector('.proj-att-preview');
+    if (prevWrap) prevWrap.style.display = 'none';
+    if (task) renderPanelProyectos(task);
+    toast(projTask ? 'Comentario registrado en empresa y proyecto en Asana' : 'Comentario registrado en empresa en Asana');
+  } catch(err) {
+    toast('Error: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function onProjRowFileSelected(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const row = input.closest('.proj-edit-row');
+  const prev = row?.querySelector('.proj-att-preview');
+  const nameEl = prev?.querySelector('.att-name');
+  if (prev && nameEl) { nameEl.textContent = file.name; prev.style.display = 'flex'; }
+}
+
+function clearProjRowAtt(btn) {
+  const row = btn.closest('.proj-edit-row');
+  const input = row?.querySelector('.proj-row-file');
+  if (input) input.value = '';
+  const prev = btn.closest('.proj-att-preview');
+  if (prev) prev.style.display = 'none';
+}
+
+// ── Story edit state: storyGid → {removeAtt, newFile}
+const projStoryEditState = new Map();
+
+function parseStoryContent(rawText) {
+  const m = rawText.match(/([\s\S]*?)\n?📎 (.+?) \[ATTACH:([^\]]+)\]\s*$/);
+  if (m) return { textPart: m[1].trim(), attName: m[2], attGid: m[3] };
+  return { textPart: rawText.trim(), attName: null, attGid: null };
+}
+
+function onProjStoryEdit(storyGid, companyGid, projName, btn) {
+  const item = btn.closest('.proj-cmt-item');
+  const existing = item.querySelector('.proj-cmt-edit');
+  if (existing) { existing.remove(); projStoryEditState.delete(storyGid); return; }
+  const rawText = item.dataset.raw || '';
+  const { textPart, attName, attGid } = parseStoryContent(rawText);
+  projStoryEditState.set(storyGid, { removeAtt: false, newFile: null, origAttGid: attGid, origAttName: attName });
+  const attHtml = attGid
+    ? `<div class="att-preview" id="pse-att-${storyGid}" style="margin-bottom:6px">
+        <i class="ti ti-paperclip"></i>
+        <span class="att-name">${e(attName)}</span>
+        <button class="att-remove" onclick="onProjStoryRemoveAtt('${storyGid}')" title="Quitar adjunto"><i class="ti ti-x"></i></button>
+       </div>`
+    : `<div id="pse-att-${storyGid}"></div>`;
+  const form = document.createElement('div');
+  form.className = 'proj-cmt-edit';
+  form.innerHTML = `
+    ${attHtml}
+    <textarea class="form-input" id="pse-ta-${storyGid}" rows="2" style="margin-bottom:6px">${e(textPart)}</textarea>
+    <div id="pse-newatt-${storyGid}" style="font-size:10px;color:var(--text3);margin-bottom:5px;display:none"></div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <input type="file" id="pse-file-${storyGid}" style="display:none" onchange="onProjStoryFileSelected('${storyGid}',this)">
+      <button class="btn-attach btn-sm" title="Adjuntar/reemplazar archivo" onclick="document.getElementById('pse-file-${storyGid}').click()"><i class="ti ti-paperclip"></i></button>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="btn btn-primary btn-sm" onclick="onProjStorySave('${storyGid}','${companyGid}','${e(projName)}')"><i class="ti ti-check"></i> Guardar</button>
+        <button class="btn btn-sm" onclick="this.closest('.proj-cmt-edit').remove()">Cancelar</button>
+      </div>
+    </div>`;
+  item.appendChild(form);
+}
+
+function onProjStoryRemoveAtt(storyGid) {
+  const st = projStoryEditState.get(storyGid) || {};
+  st.removeAtt = true;
+  st.newFile = null;
+  projStoryEditState.set(storyGid, st);
+  const el = document.getElementById(`pse-att-${storyGid}`);
+  if (el) el.innerHTML = '<span style="font-size:10px;color:var(--text3);font-style:italic">Adjunto eliminado</span>';
+}
+
+function onProjStoryFileSelected(storyGid, input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const st = projStoryEditState.get(storyGid) || {};
+  st.newFile = file;
+  st.removeAtt = false;
+  projStoryEditState.set(storyGid, st);
+  const lbl = document.getElementById(`pse-newatt-${storyGid}`);
+  if (lbl) { lbl.textContent = `Nuevo adjunto: ${file.name}`; lbl.style.display = 'block'; }
+}
+
+async function onProjStorySave(storyGid, companyGid, projName) {
+  const ta = document.getElementById(`pse-ta-${storyGid}`);
+  const textPart = ta?.value.trim() || '';
+  const st = projStoryEditState.get(storyGid) || {};
+  let attTag = '';
+  try {
+    if (st.newFile) {
+      toast('Subiendo archivo…');
+      const att = await uploadAttachment(companyGid, st.newFile);
+      attTag = `\n📎 ${att.name} [ATTACH:${att.gid}]`;
+    } else if (!st.removeAtt && st.origAttGid) {
+      attTag = `\n📎 ${st.origAttName} [ATTACH:${st.origAttGid}]`;
+    }
+    const fullText = `[Proyecto: ${projName}]\n${textPart}${attTag}`;
+    await req('PUT', `/stories/${storyGid}`, { text: fullText });
+    delete storyCache[companyGid];
+    projStoryEditState.delete(storyGid);
+    const task = tasks.find(t => t.gid === companyGid);
+    if (task) renderPanelProyectos(task);
+    toast('Comentario actualizado');
+  } catch(err) {
+    toast('Error: ' + err.message, true);
+  }
+}
+
+async function onProjStoryDel(storyGid, companyGid, projName) {
+  if (!confirm('¿Eliminar este comentario en Asana?')) return;
+  try {
+    await req('DELETE', `/stories/${storyGid}`);
+    delete storyCache[companyGid];
+    const task = tasks.find(t => t.gid === companyGid);
+    if (task) renderPanelProyectos(task);
+    toast('Comentario eliminado');
+  } catch(err) {
+    toast('Error: ' + err.message, true);
+  }
+}
+
+// Add a project to the company (links it in Asana with the chosen status)
+function addProjToCompany(gid) {
+  const sel    = document.getElementById('proj-add-sel');
+  const stSel  = document.getElementById('proj-add-status');
+  if (!sel || !sel.value) { toast('Elige un proyecto', true); return; }
+  changeProjStatus(gid, sel.value, stSel.value || 'followUp');
+}
+
+// Remove a project from the company entirely (clears it from all 3 reference fields)
+async function removeProjFromCompany(gid, projName) {
+  const task = tasks.find(t => t.gid === gid);
+  if (!task) return;
+  const pn = normProjName(projName);
+  const body = { custom_fields: {} };
+  ['followUp', 'presented', 'declined'].forEach(k => {
+    const fieldGid = STATUS_FIELD[k];
+    body.custom_fields[fieldGid] = cfRefObjs(task, fieldGid)
+      .filter(x => normProjName(x.name) !== pn).map(x => x.gid);
+  });
+  try {
+    await patchTask(gid, body);
+    toast('Proyecto desvinculado');
+    removeLogEntry(projName, gid);
+    updateBadges();
+    const fresh = tasks.find(t => t.gid === gid);
+    if (panelType === 'proyecto' && panelGid) renderProjEmpresas(panelGid);
+    else if (fresh) renderPanelProyectos(fresh);
+    if (curView === 'proyectos') renderProyectos();
+    else if (curView === 'seguimiento') renderSeguimiento();
+    else if (curView === 'dashboard') renderDashboard();
+  } catch (err) {
+    toast('Error al desvincular: ' + err.message, true);
+  }
+}
+function onProjRemove(btn) {
+  const row = btn.closest('.proj-edit-row');
+  if (confirm(`¿Desvincular "${row.dataset.proj}" de esta empresa?`)) {
+    removeProjFromCompany(panelGid, row.dataset.proj);
+  }
+}
+
+function renderPanelProyectos(task) {
+  // Union of every project the company is linked to, with its current status
+  const byProj = new Map();
+  ['followUp', 'presented', 'declined'].forEach(status => {
+    cfRef(task, STATUS_FIELD[status]).forEach(p => {
+      const k = normProjName(p);
+      if (!byProj.has(k)) byProj.set(k, { name: p, status });
+    });
+  });
+  const list = Array.from(byProj.values()).sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  const linkedNorms = new Set(list.map(x => normProjName(x.name)));
+
+  const projRow = ({ name, status }) => {
+    const d = projData(name);
+    const inv = fmtM(d.inversion);
+    const tir = fmtPct(d.tir);
+    const yoc = fmtPct(d.yoc);
+    const parts = [inv ? 'Inv '+inv : '', tir ? 'TIR '+tir : '', yoc ? 'YOC '+yoc : ''].filter(Boolean);
+    return `<div class="proj-edit-row" data-proj="${e(name)}">
+      <div class="per-top">
+        <span class="per-name" onclick="goToProject(this.closest('.proj-edit-row').dataset.proj)">${e(name)} <i class="ti ti-arrow-right" style="font-size:12px;color:var(--text3)"></i></span>
+        ${parts.length ? `<span class="per-metrics">${parts.join(' · ')}</span>` : ''}
+        <button class="per-rm" title="Desvincular proyecto" onclick="onProjRemove(this)"><i class="ti ti-trash"></i></button>
+      </div>
+      ${statusBtns(task.gid, name, status)}
+      <div class="last-act-wrap">
+        <div class="proj-cmt-list" data-gid="${task.gid}" data-proj="${e(name)}">
+          <span class="last-act-empty">Cargando…</span>
+        </div>
+        <div class="pc-compose" style="flex-direction:column;gap:5px;margin-top:8px">
+          <div class="att-preview proj-att-preview" style="display:none">
+            <i class="ti ti-paperclip"></i>
+            <span class="att-name"></span>
+            <button class="att-remove" onclick="clearProjRowAtt(this)" title="Quitar archivo"><i class="ti ti-x"></i></button>
+          </div>
+          <div style="display:flex;gap:6px;align-items:flex-end">
+            <textarea class="form-input" placeholder="Nuevo comentario — se registra en Asana (empresa y proyecto)…" rows="1" style="flex:1"></textarea>
+            <input type="file" class="proj-row-file" style="display:none" onchange="onProjRowFileSelected(this)">
+            <button class="btn-attach" title="Adjuntar archivo" onclick="this.closest('.proj-edit-row').querySelector('.proj-row-file').click()"><i class="ti ti-paperclip"></i></button>
+            <button class="btn btn-primary btn-sm" onclick="onProjCmtAdd(this)"><i class="ti ti-send"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  };
+
+  const html = list.map(projRow).join('');
+
+  // Selector to add any PROYECTOS EXPANSIÓN project not yet linked
+  const available = projExpTasks
+    .filter(t => !linkedNorms.has(normProjName(t.name)))
+    .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  const addHtml = projExpTasks.length === 0
+    ? `<div class="proj-add" style="color:var(--text3);font-size:11px">Sincroniza con Asana para cargar los proyectos.</div>`
+    : available.length === 0
+      ? ''
+      : `<div class="proj-add">
+          <select id="proj-add-sel">
+            <option value="">+ Añadir proyecto…</option>
+            ${available.map(t => `<option value="${e(t.name)}">${e(t.name)}</option>`).join('')}
+          </select>
+          <select id="proj-add-status">
+            <option value="followUp">Follow Up</option>
+            <option value="presented">Presentado</option>
+            <option value="declined">Declinado</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="addProjToCompany('${task.gid}')"><i class="ti ti-plus"></i> Añadir</button>
+        </div>`;
+
+  document.getElementById('panel-body').innerHTML = `
+    <div style="font-size:11px;color:var(--text2);margin-bottom:10px">Vincula proyectos a esta empresa, cambia su estado y añade comentarios. Estado y comentarios se sincronizan en Asana (empresa y proyecto).</div>
+    ${addHtml}
+    ${html || '<div class="empty"><i class="ti ti-building-off"></i>Sin proyectos asociados</div>'}`;
+
+  // Async: fill last Asana comment per project from company stories
+  if (list.length) fillCompanyProjLastCmts(task.gid, list.map(x => x.name));
+}
+
+async function fillCompanyProjLastCmts(companyGid, projNames) {
+  try {
+    const stories = await fetchStoriesCached(companyGid);
+    document.querySelectorAll(`.proj-cmt-list[data-gid="${companyGid}"]`).forEach(el => {
+      const projName = el.dataset.proj;
+      if (!projNames.includes(projName)) return;
+      const pn = normProjName(projName);
+      const matching = stories
+        .filter(s => { const m = s.text?.match(/^\[Proyecto:\s*(.+?)\]/i); return m && normProjName(m[1]) === pn; })
+        .slice(-4).reverse(); // last 4, newest first
+      if (!matching.length) {
+        el.innerHTML = '<span class="last-act-empty">Sin actividad Asana para este proyecto</span>';
+        return;
+      }
+      el.innerHTML = matching.map(s => {
+        const txt = s.text.replace(/^\[Proyecto:[^\]]+\]\n?/i, '').trim();
+        const { textPart, attName, attGid } = parseStoryContent(txt);
+        return `<div class="proj-cmt-item" data-story="${s.gid}" data-raw="${e(txt)}">
+          <div class="proj-cmt-body">
+            <div class="proj-cmt-meta">${e(s.created_by?.name||'?')} · ${fmtDate(s.created_at)}</div>
+            <div class="proj-cmt-txt">${e(textPart)}${attGid ? `\n<span class="att-chip" onclick="openAttachment('${attGid}',this)"><i class="ti ti-paperclip"></i>${e(attName)}</span>` : ''}</div>
+          </div>
+          <div class="proj-cmt-acts">
+            <button class="icon-btn-sm" title="Editar" onclick="onProjStoryEdit('${s.gid}','${companyGid}','${e(projName)}',this)"><i class="ti ti-pencil"></i></button>
+            <button class="icon-btn-sm del" title="Eliminar" onclick="onProjStoryDel('${s.gid}','${companyGid}','${e(projName)}')"><i class="ti ti-x"></i></button>
+          </div>
+        </div>`;
+      }).join('');
+    });
+  } catch {
+    document.querySelectorAll(`.proj-cmt-list[data-gid="${companyGid}"]`).forEach(el => {
+      el.innerHTML = '<span class="last-act-empty">Sin actividad</span>';
+    });
+  }
+}
+
+async function renderPanelActividad(task) {
+  const body = document.getElementById('panel-body');
+  body.innerHTML = '<div class="loading"><div class="spinner"></div> Cargando actividad…</div>';
+  try {
+    const stories = await fetchStories(task.gid);
+    const cmtsHtml = stories.length
+      ? stories.slice().reverse().map(s => `
+          <div class="cmt-item">
+            <div class="cmt-av">${initials(s.created_by?.name)}</div>
+            <div class="cmt-bubble">
+              <div class="cmt-meta">${e(s.created_by?.name||'?')} · ${fmtDate(s.created_at)}</div>
+              <div class="cmt-text">${formatCmtText(s.text)}</div>
+            </div>
+          </div>`).join('')
+      : '<div class="empty" style="padding:20px"><i class="ti ti-message-off"></i>Sin comentarios aún</div>';
+
+    // Build project selector with linked projects
+    const linkedProjs = [];
+    ['followUp', 'presented', 'declined'].forEach(k => {
+      cfRef(task, STATUS_FIELD[k]).forEach(p => {
+        if (!linkedProjs.find(x => normProjName(x) === normProjName(p))) linkedProjs.push(p);
+      });
+    });
+    linkedProjs.sort((a, b) => a.localeCompare(b, 'es'));
+
+    const projSelHtml = linkedProjs.length
+      ? `<div class="form-group" style="margin-bottom:6px">
+           <label class="form-label">Proyecto relacionado <span class="form-asana">· se registrará también en Asana del proyecto</span></label>
+           <select class="form-input form-select" id="cmt-proj-sel">
+             <option value="">— Sin referencia a proyecto —</option>
+             ${linkedProjs.map(p => `<option value="${e(p)}">${e(p)}</option>`).join('')}
+           </select>
+         </div>`
+      : '';
+
+    body.innerHTML = `
+      ${cmtsHtml}
+      <div class="cmt-compose" style="flex-direction:column;align-items:stretch;gap:6px">
+        ${projSelHtml}
+        <div id="att-preview-wrap" style="display:none" class="att-preview">
+          <i class="ti ti-paperclip"></i>
+          <span class="att-name" id="att-preview-name"></span>
+          <button class="att-remove" onclick="clearAttachment()" title="Quitar archivo"><i class="ti ti-x"></i></button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <textarea class="form-input" id="new-cmt" placeholder="Escribe un comentario en Asana…" rows="2" style="flex:1"></textarea>
+          <input type="file" id="cmt-file-input" style="display:none" onchange="onFileSelected(this)">
+          <button class="btn-attach" title="Adjuntar archivo" onclick="document.getElementById('cmt-file-input').click()"><i class="ti ti-paperclip"></i></button>
+          <button class="btn btn-primary" onclick="sendComment('${task.gid}')"><i class="ti ti-send"></i></button>
+        </div>
+      </div>`;
+  } catch(err) {
+    body.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>Error: ${e(err.message)}</div>`;
+  }
+}
+
+function onFileSelected(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const wrap = document.getElementById('att-preview-wrap');
+  const nameEl = document.getElementById('att-preview-name');
+  if (wrap && nameEl) {
+    nameEl.textContent = file.name;
+    wrap.style.display = 'flex';
+  }
+}
+
+function clearAttachment() {
+  const input = document.getElementById('cmt-file-input');
+  if (input) input.value = '';
+  const wrap = document.getElementById('att-preview-wrap');
+  if (wrap) wrap.style.display = 'none';
+}
+
+async function sendComment(gid) {
+  const ta = document.getElementById('new-cmt');
+  const text = ta?.value.trim();
+  const fileInput = document.getElementById('cmt-file-input');
+  const file = fileInput?.files?.[0];
+  if (!text && !file) return;
+  const projSel = document.getElementById('cmt-proj-sel');
+  const projName = projSel ? projSel.value.trim() : '';
+  ta.disabled = true;
+  try {
+    // Upload attachment first if present
+    let attTag = '';
+    if (file) {
+      toast('Subiendo archivo…');
+      const att = await uploadAttachment(gid, file);
+      attTag = `\n📎 ${att.name} [ATTACH:${att.gid}]`;
+    }
+
+    const task = tasks.find(t => t.gid === gid);
+    const fullText = text + attTag;
+
+    if (projName) {
+      await postStory(gid, `[Proyecto: ${projName}]\n${fullText}`);
+      const projTask = lookupProjTask(projName);
+      if (projTask) {
+        const companyName = task ? task.name : gid;
+        await postStory(projTask.gid, `[Empresa: ${companyName}]\n${fullText}`);
+        delete storyCache[projTask.gid];
+        toast(file ? 'Comentario con archivo enviado a empresa y proyecto' : 'Comentario registrado en empresa y proyecto en Asana');
+      } else {
+        toast('Comentario enviado a empresa (proyecto no encontrado en PROYECTOS EXPANSIÓN)');
+      }
+    } else {
+      await postStory(gid, fullText);
+      toast(file ? 'Comentario con archivo enviado a Asana' : 'Comentario enviado a Asana');
+    }
+    delete storyCache[gid];
+    ta.value = '';
+    clearAttachment();
+    if (task) await renderPanelActividad(task);
+  } catch(err) {
+    toast('Error: ' + err.message, true);
+    ta.disabled = false;
+  }
+}
+
+async function saveField(el) {
+  const { gid, field, type } = el.dataset;
+  const val = el.value;
+  const task = tasks.find(t => t.gid === gid);
+  if (!task) return;
+
+  let body = {};
+  if (type === 'notes')      body = { notes: val };
+  else if (type === 'text')  body = { custom_fields: { [field]: val } };
+  else if (type === 'enum')  body = { custom_fields: { [field]: val || null } };
+  else if (type === 'date')  body = { custom_fields: { [field]: val ? { date: val } : null } };
+  else if (type === 'people') body = { custom_fields: { [field]: val ? [val] : [] } };
+
+  try {
+    await patchTask(gid, body);
+    el.classList.add('saved-flash');
+    setTimeout(() => el.classList.remove('saved-flash'), 1200);
+    updateBadges();
+    if (field === CF.rol || field === CF.actividad || field === CF.localizacion) {
+      const fresh = tasks.find(t => t.gid === gid);
+      if (fresh) {
+        document.getElementById('panel-tags').innerHTML = [
+          rolTag(cfEnum(fresh, CF.rol)),
+          ...cfMulti(fresh, CF.actividad).map(a => `<span class="tag tag-blue">${e(a)}</span>`),
+          ...cfMulti(fresh, CF.localizacion).map(l => `<span class="tag tag-gray">${e(l)}</span>`),
+        ].join('');
+      }
+    }
+  } catch(err) {
+    el.classList.add('err-flash');
+    setTimeout(() => el.classList.remove('err-flash'), 1500);
+    toast('Error guardando: ' + err.message, true);
+  }
+}
+
+function openAdd() {
+  document.getElementById('panel-overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+  panelGid = null;
+  document.getElementById('panel-title').textContent = 'Nueva empresa';
+  document.getElementById('panel-sub').textContent = 'Se creará como tarea en Asana · CRM';
+  document.getElementById('panel-tags').innerHTML = '';
+  document.getElementById('panel-tabs').innerHTML = `
+    <div class="p-tab active">Información</div>
+    <div class="p-tab" style="opacity:.4">Contactos</div>
+    <div class="p-tab" style="opacity:.4">Proyectos</div>
+    <div class="p-tab" style="opacity:.4">Actividad</div>`;
+  document.getElementById('panel-body').innerHTML = `
+    <div class="form-group"><label class="form-label">Nombre de la empresa *</label><input class="form-input" id="new-name" placeholder="Empresa S.L."></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Contacto <span class="form-asana">· CONTACTO</span></label><input class="form-input" id="new-contacto" placeholder="Nombre contacto"></div>
+      <div class="form-group"><label class="form-label">Cargo <span class="form-asana">· CARGO DEL CONTACTO</span></label><input class="form-input" id="new-cargo" placeholder="Director..."></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Email <span class="form-asana">· EMAIL</span></label><input class="form-input" id="new-email" type="email"></div>
+      <div class="form-group"><label class="form-label">Teléfono <span class="form-asana">· TELEFONO</span></label><input class="form-input" id="new-tel"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Rol <span class="form-asana">· ROL</span></label>
+        <select class="form-input form-select" id="new-rol">
+          <option value="">—</option>
+          ${Object.entries(ROL_OPTS).map(([n,g]) => `<option value="${g}">${e(n)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Follow-up <span class="form-asana">· DATE FOLLOW UP</span></label><input class="form-input" type="date" id="new-fu"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:6px">
+      <button class="btn btn-primary" onclick="createEmpresa()"><i class="ti ti-check"></i> Crear en Asana</button>
+      <button class="btn" onclick="closePanel()">Cancelar</button>
+    </div>
+    <div id="new-status" style="font-size:11px;color:var(--text2);margin-top:8px"></div>`;
+}
+
+async function createEmpresa() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { toast('El nombre es obligatorio', true); return; }
+  const st = document.getElementById('new-status');
+  st.textContent = 'Creando en Asana…';
+  const customFields = {};
+  const v = id => document.getElementById(id).value.trim();
+  if (v('new-contacto')) customFields[CF.contacto] = v('new-contacto');
+  if (v('new-cargo'))    customFields[CF.cargo]    = v('new-cargo');
+  if (v('new-email'))    customFields[CF.email]    = v('new-email');
+  if (v('new-tel'))      customFields[CF.telefono] = v('new-tel');
+  if (v('new-rol'))      customFields[CF.rol]      = v('new-rol');
+  if (v('new-fu'))       customFields[CF.dateFU]   = { date: v('new-fu') };
+  try {
+    const t = await createTask(name, customFields);
+    tasks.unshift(t);
+    saveCache();
+    updateBadges();
+    toast('Empresa creada en Asana');
+    closePanel();
+    nav('empresas');
+    syncNow().catch(() => {});
+  } catch(err) {
+    st.textContent = 'Error: ' + err.message;
+    toast(err.message, true);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PROYECTOS VIEW
+// ═══════════════════════════════════════════════
+function allProjectNames() {
+  const seen = new Map();
+  tasks.filter(t => !t.completed).forEach(t => {
+    [CF.followUp, CF.presented, CF.declined].forEach(gid => {
+      cfRef(t, gid).forEach(name => {
+        const key = normProjName(name);
+        if (!seen.has(key)) seen.set(key, name.trim());
+      });
+    });
+  });
+  projExpTasks.forEach(t => {
+    const key = normProjName(t.name);
+    if (!seen.has(key)) seen.set(key, t.name.trim());
+  });
+  return Array.from(seen.values()).sort((a,b) => a.localeCompare(b, 'es'));
+}
+
+function companiesForProject(projName) {
+  const pn = normProjName(projName);
+  const fu = [], presented = [], declined = [];
+  tasks.filter(t => !t.completed).forEach(t => {
+    if (cfRef(t, CF.followUp).some(n => normProjName(n) === pn))   fu.push(t);
+    if (cfRef(t, CF.presented).some(n => normProjName(n) === pn))  presented.push(t);
+    if (cfRef(t, CF.declined).some(n => normProjName(n) === pn))   declined.push(t);
+  });
+  return { fu, presented, declined };
+}
+
+// ═══════════════════════════════════════════════
+// PROJECT STATUS EDITING (Follow Up / Presentado / Declinado)
+// ═══════════════════════════════════════════════
+const STATUS_FIELD = { followUp: CF.followUp, presented: CF.presented, declined: CF.declined };
+const STATUS_META  = {
+  followUp:  { label: 'Follow Up',  cls: 'stb-fu' },
+  presented: { label: 'Presentado', cls: 'stb-pr' },
+  declined:  { label: 'Declinado',  cls: 'stb-dc' },
+};
+
+// Which status a company currently holds for a given project ('' if none)
+function projStatusOf(task, projName) {
+  const pn = normProjName(projName);
+  for (const k of ['followUp', 'presented', 'declined']) {
+    if (cfRef(task, STATUS_FIELD[k]).some(n => normProjName(n) === pn)) return k;
+  }
+  return '';
+}
+
+// Render the 3-state toggle for a company within a project
+function statusBtns(taskGid, projName, current) {
+  const btn = (key) => {
+    const m = STATUS_META[key];
+    return `<button class="stbtn ${m.cls} ${current === key ? 'on' : ''}" data-gid="${taskGid}" data-proj="${e(projName)}" data-status="${key}" onclick="onStatusBtn(event,this)">${m.label}</button>`;
+  };
+  return `<div class="stbtn-group" onclick="event.stopPropagation()">${btn('followUp')}${btn('presented')}${btn('declined')}</div>`;
+}
+
+function onStatusBtn(ev, el) {
+  ev.stopPropagation();
+  changeProjStatus(el.dataset.gid, el.dataset.proj, el.dataset.status);
+}
+
+// Move a company to a target status for a project, updating all 3 reference fields in one PATCH.
+// Reference fields store an array of PROYECTOS EXPANSIÓN task GIDs.
+async function changeProjStatus(taskGid, projName, target) {
+  const task = tasks.find(t => t.gid === taskGid);
+  if (!task) return;
+  const pn = normProjName(projName);
+
+  // Resolve the referenced project-task GID: from an existing reference, else from PROYECTOS EXPANSIÓN
+  let projTaskGid = null;
+  for (const k of ['followUp', 'presented', 'declined']) {
+    const obj = cfRefObjs(task, STATUS_FIELD[k]).find(x => normProjName(x.name) === pn);
+    if (obj) { projTaskGid = obj.gid; break; }
+  }
+  if (!projTaskGid) projTaskGid = lookupProjTask(projName)?.gid || null;
+  if (!projTaskGid) { toast('Proyecto no encontrado en PROYECTOS EXPANSIÓN', true); return; }
+
+  const body = { custom_fields: {} };
+  ['followUp', 'presented', 'declined'].forEach(k => {
+    const fieldGid = STATUS_FIELD[k];
+    const curObjs  = cfRefObjs(task, fieldGid);
+    let next;
+    if (k === target) {
+      const ids = curObjs.map(x => x.gid);
+      next = ids.includes(projTaskGid) ? ids : [...ids, projTaskGid];
+    } else {
+      // remove this project from the other fields
+      next = curObjs.filter(x => normProjName(x.name) !== pn).map(x => x.gid);
+    }
+    body.custom_fields[fieldGid] = next;
+  });
+
+  try {
+    await patchTask(taskGid, body);
+    toast('Estado actualizado en Asana');
+    // Keep log in sync: preserve existing date/notes, only update status
+    const existing = getCompanyLog(projName, taskGid);
+    upsertLogEntry(projName, taskGid, task.name, target,
+      existing?.date || todayStr(),
+      existing?.notes || '');
+    updateBadges();
+    // Re-render whichever surface is visible
+    const fresh = tasks.find(t => t.gid === taskGid);
+    if (panelType === 'proyecto' && panelGid) renderProjEmpresas(panelGid);
+    else if (panelType === 'empresa' && fresh) renderPanelProyectos(fresh);
+    if (curView === 'proyectos') renderProyectos();
+    else if (curView === 'seguimiento') renderSeguimiento();
+    else if (curView === 'dashboard') renderDashboard();
+  } catch (err) {
+    toast('Error al cambiar estado: ' + err.message, true);
+  }
+}
+
+// Fetch + cache the last Asana comment for a set of companies, then fill their note slots in the DOM
+async function fillLastComments(gids) {
+  await Promise.all(gids.map(async gid => {
+    if (lastCommentCache[gid] === undefined) {
+      try {
+        const stories = await fetchStories(gid);
+        lastCommentCache[gid] = stories.length ? (stories[stories.length - 1].text || '') : '';
+      } catch { lastCommentCache[gid] = ''; }
+    }
+    document.querySelectorAll(`.pcr-notes[data-gid="${gid}"]`).forEach(elNode => {
+      const txt = (lastCommentCache[gid] || '').trim();
+      if (txt) {
+        elNode.classList.remove('empty');
+        const short = txt.length > 160 ? txt.slice(0, 160) + '…' : txt;
+        elNode.textContent = short;
+        elNode.title = txt;
+      } else {
+        elNode.classList.add('empty');
+        elNode.textContent = 'Sin comentarios en Asana';
+      }
+    });
+  }));
+}
+
+// ── Project status helpers ──────────────────────────────────────────────────
+
+function isArchivedProject(name) {
+  if (!projStatusField) return false;
+  const t = lookupProjTask(name);
+  if (!t) return false;
+  const cf = t.custom_fields?.find(f => f.gid === projStatusField.gid);
+  return /archiv/i.test(cf?.enum_value?.name || '');
+}
+
+function allActiveProjectNames() {
+  return allProjectNames().filter(n => !isArchivedProject(n));
+}
+
+function projStatusOptionGid(projTask) {
+  if (!projStatusField || !projTask) return '';
+  return projTask.custom_fields?.find(f => f.gid === projStatusField.gid)?.enum_value?.gid || '';
+}
+
+async function discoverProjStatusField() {
+  if (!PAT) return;
+  try {
+    const url = `/projects/${PROJ_EXP_GID}?opt_fields=custom_field_settings,custom_field_settings.custom_field,custom_field_settings.custom_field.gid,custom_field_settings.custom_field.name,custom_field_settings.custom_field.type,custom_field_settings.custom_field.enum_options,custom_field_settings.custom_field.enum_options.gid,custom_field_settings.custom_field.enum_options.name`;
+    const res = await req('GET', url);
+    const settings = res.data?.custom_field_settings || [];
+    for (const s of settings) {
+      const cf = s.custom_field;
+      if (cf.type !== 'enum' || !cf.enum_options?.length) continue;
+      if (cf.enum_options.some(o => /archiv/i.test(o.name))) {
+        const found = { gid: cf.gid, name: cf.name, options: cf.enum_options.map(o => ({ gid: o.gid, name: o.name })) };
+        if (JSON.stringify(found) !== JSON.stringify(projStatusField)) {
+          projStatusField = found;
+          localStorage.setItem('crm2_projstatusfield', JSON.stringify(projStatusField));
+          updateBadges();
+          renderView();
+        }
+        return;
+      }
+    }
+  } catch(err) {
+    console.log('discoverProjStatusField:', err.message);
+  }
+}
+
+async function setProjStatus(name, optionGid) {
+  const task = lookupProjTask(name);
+  if (!task) { toast('Proyecto no encontrado en PROYECTOS EXPANSIÓN', true); return; }
+  if (!projStatusField) { toast('Campo de estado no detectado aún — sincroniza primero', true); return; }
+  const sel = document.querySelector('.proj-status-sel');
+  if (sel) sel.disabled = true;
+  try {
+    await req('PUT', `/tasks/${task.gid}`, { custom_fields: { [projStatusField.gid]: optionGid || null } });
+    const fresh = (await req('GET', `/tasks/${task.gid}?opt_fields=${PROJ_OPT_FIELDS}`)).data;
+    const idx = projExpTasks.findIndex(t => t.gid === task.gid);
+    if (idx >= 0) projExpTasks[idx] = fresh;
+    saveProjCache();
+    if (panelType === 'proyecto' && panelGid === name) {
+      const c = companiesForProject(name);
+      const archived = isArchivedProject(name);
+      document.getElementById('panel-tags').innerHTML = [
+        c.fu.length        ? `<span class="pill-fu">Follow Up: ${c.fu.length}</span>` : '',
+        c.presented.length ? `<span class="pill-pr">Presentado: ${c.presented.length}</span>` : '',
+        c.declined.length  ? `<span class="pill-dc">Declinado: ${c.declined.length}</span>` : '',
+        archived ? `<span class="arch-badge"><i class="ti ti-archive" style="font-size:10px"></i> Archivado</span>` : '<span class="tag tag-green" style="font-size:9px">Asana</span>',
+      ].join('');
+      renderProjFicha(name);
+    }
+    updateBadges();
+    renderProyectos();
+    toast('Estado actualizado en Asana');
+  } catch(err) {
+    toast('Error: ' + err.message, true);
+  } finally {
+    if (sel) sel.disabled = false;
+  }
+}
+
+function toggleArchivedSection() {
+  showArchived = !showArchived;
+  const grid = document.getElementById('archived-grid');
+  const btn  = document.getElementById('btn-toggle-archived');
+  if (grid) grid.style.display = showArchived ? 'grid' : 'none';
+  if (btn)  btn.innerHTML = showArchived
+    ? '<i class="ti ti-chevron-up"></i> Ocultar'
+    : '<i class="ti ti-chevron-down"></i> Mostrar';
+}
+
+// ── Project card HTML (extracted so active + archived share the same template) ──
+
+function projCardHtml(name, isArchived = false) {
+  const d = projData(name);
+  const c = companiesForProject(name);
+  const hasData = d.inversion !== undefined || d.yoc !== undefined || d.fees_eur !== undefined;
+
+  const metric = (val, lbl) => {
+    const empty = val === null || val === undefined;
+    return `<div class="metric">
+      <div class="metric-val ${empty?'empty':''}">${empty ? '—' : val}</div>
+      <div class="metric-lbl">${lbl}</div>
+    </div>`;
+  };
+
+  const catSection = (label, hdrCls, cntCls, chipCls, lst) => {
+    if (!lst.length) return '';
+    const chips = lst.map(t =>
+      `<span class="proj-chip ${chipCls}" title="${e(t.name)}"
+        onclick="event.stopPropagation();goToEmpresa('${t.gid}')">${e(t.name)}</span>`
+    ).join('');
+    return `<div class="proj-cat-section">
+      <div class="proj-cat-hdr ${hdrCls}">
+        <span>${label}</span>
+        <span class="proj-cat-count ${cntCls}">${lst.length}</span>
+      </div>
+      <div class="proj-company-chips">${chips}</div>
+    </div>`;
+  };
+
+  const companiesHtml = catSection('Follow Up','hdr-fu','cnt-fu','proj-chip-fu', c.fu) +
+                        catSection('Presentado','hdr-pr','cnt-pr','proj-chip-pr', c.presented) +
+                        catSection('Declinado', 'hdr-dc','cnt-dc','proj-chip-dc', c.declined);
+
+  return `<div class="proj-card ${hasData?'has-data':''} ${isArchived?'proj-archived':''}" data-proj="${e(name)}" onclick="openProjectPanel(this.dataset.proj)">
+    <div class="proj-name">${e(name)}${isArchived?` <span class="arch-badge"><i class="ti ti-archive" style="font-size:9px"></i> Archivado</span>`:''}</div>
+    <div class="proj-desc">${d.descripcion
+      ? e(d.descripcion.substring(0,100)) + (d.descripcion.length > 100 ? '…' : '')
+      : '<span style="color:var(--text3);font-style:italic">Sin descripción</span>'}</div>
+    <div class="proj-metrics">
+      ${metric(fmtM(d.inversion), 'Inversión')}
+      ${metric(fmtPct(d.yoc), 'YOC')}
+      ${metric(fmtM(d.fees_eur), 'Fees nhood')}
+    </div>
+    ${companiesHtml
+      ? `<div class="proj-companies">${companiesHtml}</div>`
+      : '<div style="margin-top:10px;border-top:.5px solid var(--border);padding-top:8px"><span class="tag tag-gray">Sin empresas asignadas</span></div>'}
+  </div>`;
+}
+
+function renderProyectos() {
+  const names         = allProjectNames();
+  const activeNames   = names.filter(n => !isArchivedProject(n));
+  const archivedNames = names.filter(n =>  isArchivedProject(n));
+
+  document.getElementById('b-projs').textContent = activeNames.length || '–';
+
+  document.getElementById('proj-filters').innerHTML = [
+    `<button class="f-chip ${!projFilter?'on':''}" onclick="projFilter='';renderProyectos()">Todos</button>`,
+    `<button class="f-chip ${projFilter==='fu'?'on':''}" onclick="projFilter='fu';renderProyectos()">Con Follow-Up</button>`,
+    `<button class="f-chip ${projFilter==='presented'?'on':''}" onclick="projFilter='presented';renderProyectos()">Presentados</button>`,
+    `<button class="f-chip ${projFilter==='declined'?'on':''}" onclick="projFilter='declined';renderProyectos()">Declinados</button>`,
+  ].join('');
+
+  let list = activeNames;
+  if (projFilter) list = list.filter(name => companiesForProject(name)[projFilter].length > 0);
+
+  if (!list.length && !archivedNames.length) {
+    document.getElementById('proj-grid').innerHTML =
+      `<div class="empty" style="grid-column:1/-1"><i class="ti ti-building-off"></i>Sin proyectos — sincroniza con Asana</div>`;
+    document.getElementById('proj-archived').innerHTML = '';
+    return;
+  }
+
+  document.getElementById('proj-grid').innerHTML = list.length
+    ? list.map(name => projCardHtml(name)).join('')
+    : `<div class="empty" style="grid-column:1/-1">Sin proyectos activos con este filtro</div>`;
+
+  // Sección "Proyectos archivados"
+  if (archivedNames.length) {
+    document.getElementById('proj-archived').innerHTML = `
+      <div style="margin-top:22px;border-top:.5px solid var(--border);padding-top:16px">
+        <div class="sec-hdr" style="margin-bottom:${showArchived?'10px':'0'}">
+          <div class="sec-title" style="color:var(--text2);display:flex;align-items:center;gap:6px">
+            <i class="ti ti-archive"></i> Proyectos archivados
+            <span class="nbadge">${archivedNames.length}</span>
+          </div>
+          <button class="btn btn-sm" id="btn-toggle-archived" onclick="toggleArchivedSection()">
+            ${showArchived ? '<i class="ti ti-chevron-up"></i> Ocultar' : '<i class="ti ti-chevron-down"></i> Mostrar'}
+          </button>
+        </div>
+        <div id="archived-grid" class="proj-grid" style="margin-top:10px;display:${showArchived?'grid':'none'}">
+          ${archivedNames.map(name => projCardHtml(name, true)).join('')}
+        </div>
+      </div>`;
+  } else {
+    document.getElementById('proj-archived').innerHTML = '';
+  }
+}
+
+function goToEmpresa(gid) {
+  closePanel();
+  nav('empresas');
+  setTimeout(() => openPanel(gid), 60);
+}
+
+function goToProject(name) {
+  closePanel();
+  nav('proyectos');
+  setTimeout(() => openProjectPanel(name), 60);
+}
+
+function openProjectPanel(name) {
+  panelType = 'proyecto';
+  panelGid = name;
+
+  document.getElementById('panel-title').textContent = name;
+  document.getElementById('panel-sub').textContent = 'Proyecto · nhood Development';
+  const c = companiesForProject(name);
+  const inAsana = !!lookupProjTask(name);
+  const archived = isArchivedProject(name);
+  document.getElementById('panel-tags').innerHTML = [
+    c.fu.length        ? `<span class="pill-fu">Follow Up: ${c.fu.length}</span>` : '',
+    c.presented.length ? `<span class="pill-pr">Presentado: ${c.presented.length}</span>` : '',
+    c.declined.length  ? `<span class="pill-dc">Declinado: ${c.declined.length}</span>` : '',
+    archived ? `<span class="arch-badge"><i class="ti ti-archive" style="font-size:10px"></i> Archivado</span>` : '',
+    inAsana  ? '<span class="tag tag-green" style="font-size:9px">Asana</span>' : '<span class="tag tag-amber" style="font-size:9px">Local</span>',
+  ].join('');
+
+  const total = c.fu.length + c.presented.length + c.declined.length;
+  document.getElementById('panel-tabs').innerHTML = `
+    <div class="p-tab active" onclick="switchProjTab('empresas')">Empresas (${total})</div>
+    <div class="p-tab" onclick="switchProjTab('ficha')">Ficha del proyecto</div>
+    <div class="p-tab" onclick="switchProjTab('actividad')">Actividad</div>`;
+
+  renderProjEmpresas(name);
+
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('panel-overlay').classList.add('open');
+}
+
+function switchProjTab(tab) {
+  const name = panelGid;
+  document.querySelectorAll('#panel-tabs .p-tab').forEach((el,i) => {
+    el.classList.toggle('active',
+      (i===0 && tab==='empresas') || (i===1 && tab==='ficha') || (i===2 && tab==='actividad'));
+  });
+  if (tab === 'ficha') renderProjFicha(name);
+  else if (tab === 'actividad') renderProjActividad(name);
+  else renderProjEmpresas(name);
+}
+
+function renderProjFicha(name) {
+  const d = projData(name);
+  const inAsana = !!lookupProjTask(name);
+  const syncNote = inAsana
+    ? `<div style="font-size:10px;color:var(--ok);padding:0 0 10px;display:flex;align-items:center;gap:5px"><i class="ti ti-cloud-check"></i> Sincronizado con Asana · PROYECTOS EXPANSIÓN</div>`
+    : `<div style="font-size:10px;color:var(--warn);padding:0 0 10px;display:flex;align-items:center;gap:5px"><i class="ti ti-alert-circle"></i> Proyecto no encontrado en PROYECTOS EXPANSIÓN — se guarda localmente</div>`;
+
+  const numInp = (label, asanaLabel, key, placeholder='') => {
+    const raw = d[key];
+    const isPct = PCT_FIELDS.has(key);
+    const displayVal = raw !== undefined && raw !== null
+      ? (isPct ? (parseFloat(raw) * 100).toFixed(2) : raw)
+      : '';
+    return `<div class="form-group">
+      <label class="form-label">${label} <span class="form-asana">· ${asanaLabel}</span></label>
+      <input class="form-input" type="number" step="0.01" value="${displayVal}" placeholder="${placeholder}"
+        data-proj="${e(name)}" data-key="${e(key)}" data-pct="${isPct?'1':'0'}" onblur="saveProjField(this.dataset.proj,this.dataset.key,this.value,this,this.dataset.pct==='1')">
+    </div>`;
+  };
+
+  const currentStatusGid = projStatusOptionGid(lookupProjTask(name));
+  const statusHtml = (projStatusField && inAsana) ? `
+    <div class="form-group">
+      <label class="form-label">Estado <span class="form-asana">· ${e(projStatusField.name || projStatusField.gid)}</span></label>
+      <select class="form-input form-select proj-status-sel" data-proj="${e(name)}" onchange="setProjStatus(this.dataset.proj, this.value)">
+        <option value="">— Sin estado —</option>
+        ${projStatusField.options.map(o => `<option value="${o.gid}" ${currentStatusGid===o.gid?'selected':''}>${e(o.name)}</option>`).join('')}
+      </select>
+    </div>` : '';
+
+  document.getElementById('panel-body').innerHTML = `
+    ${syncNote}
+    ${statusHtml}
+    <div class="form-group">
+      <label class="form-label">Nombre del proyecto <span class="form-asana">· task name en PROYECTOS EXPANSIÓN</span></label>
+      <input class="form-input" value="${e(name)}" data-proj="${e(name)}" data-key="nombre"
+        onblur="saveProjField(this.dataset.proj,'nombre',this.value,this)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción <span class="form-asana">· notes</span></label>
+      <textarea class="form-input" rows="3" placeholder="Resumen del proyecto, tipología, ubicación..."
+        data-proj="${e(name)}" data-key="descripcion" onblur="saveProjField(this.dataset.proj,this.dataset.key,this.value,this)">${e(d.descripcion||'')}</textarea>
+    </div>
+    <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 8px;border-top:.5px solid var(--border);padding-top:12px">Inversión y rentabilidad</div>
+    <div class="form-row">
+      ${numInp('Inversión prevista (€)','INVERSION PREVISTA','inversion','15000000')}
+      ${numInp('Fees nhood previstos (€)','FEES NHOOD PREVISTOS','fees_eur','500000')}
+    </div>
+    <div class="form-row">
+      ${numInp('YOC — Yield on Cost (%)','YOC','yoc','8.9')}
+      ${numInp('TIR / IRR (%)','TIR / IRR','tir','14.2')}
+    </div>
+    <div class="form-row">
+      ${numInp('Exit Yield / Yield salida (%)','EXIT YIELD','yield_exit','5.5')}
+      ${numInp('Plazo (años)','PLAZO','plazo','3')}
+    </div>
+    <div class="form-row">
+      ${numInp('GLA / SBA (m²)','GLA / SBA (M2)','m2','12000')}
+      <div></div>
+    </div>
+    <div style="margin-top:16px;padding-top:12px;border-top:.5px solid var(--border);display:flex;align-items:center;gap:8px">
+      ${inAsana ? `<a href="https://app.asana.com/1/1200164847043615/project/${PROJ_EXP_GID}" target="_blank" class="btn btn-sm"><i class="ti ti-external-link"></i> Abrir en Asana</a>` : ''}
+      <button class="btn btn-sm btn-danger" onclick="deleteProject('${e(name).replace(/'/g,'&#39;')}')">
+        <i class="ti ti-trash"></i> Eliminar proyecto
+      </button>
+    </div>`;
+}
+
+async function deleteProject(name) {
+  const projTask = lookupProjTask(name);
+  const msg = projTask
+    ? `¿Eliminar el proyecto "${name}"?\n\nSe eliminará la tarea de PROYECTOS EXPANSIÓN en Asana. Las empresas vinculadas no se borran pero perderán la referencia.`
+    : `¿Eliminar el proyecto local "${name}"?`;
+  if (!confirm(msg)) return;
+  try {
+    if (projTask) {
+      await req('DELETE', `/tasks/${projTask.gid}`);
+      projExpTasks = projExpTasks.filter(t => t.gid !== projTask.gid);
+      saveProjCache();
+    }
+    delete projs[name];
+    localStorage.setItem('crm2_projs', JSON.stringify(projs));
+    const key = normProjName(name);
+    delete projLog[key];
+    saveProjLog();
+    closePanel();
+    updateBadges();
+    renderProyectos();
+    toast(`"${name}" eliminado`);
+  } catch(err) {
+    toast('Error al eliminar: ' + err.message, true);
+  }
+}
+
+async function renderProjActividad(name) {
+  const body = document.getElementById('panel-body');
+  body.innerHTML = '<div class="loading"><div class="spinner"></div> Cargando actividad…</div>';
+  const projTask = lookupProjTask(name);
+  if (!projTask) {
+    body.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>Proyecto no encontrado en PROYECTOS EXPANSIÓN — sin actividad disponible</div>`;
+    return;
+  }
+  try {
+    const stories = await fetchStories(projTask.gid);
+    const compStories = stories.filter(s => s.text && /^\[Empresa:/i.test(s.text));
+    if (!compStories.length) {
+      body.innerHTML = `<div class="empty" style="padding:30px 20px">
+        <i class="ti ti-message-off" style="font-size:24px;display:block;margin-bottom:8px"></i>
+        Sin actividad de empresas aún<br>
+        <span style="font-size:10px;color:var(--text3)">Los comentarios aparecen aquí cuando se registran desde el tab Actividad de una empresa seleccionando este proyecto</span>
+      </div>`;
+      return;
+    }
+    const html = compStories.slice().reverse().map(s => {
+      const m = s.text.match(/^\[Empresa:\s*(.+?)\]\n?([\s\S]*)$/i);
+      const companyName = m ? m[1].trim() : '?';
+      const cmtText = m ? m[2].trim() : s.text;
+      // Try to find company gid for navigation
+      const compTask = tasks.find(t => t.name === companyName);
+      const nameHtml = compTask
+        ? `<span style="font-weight:600;color:var(--accent);cursor:pointer" onclick="goToEmpresa('${compTask.gid}')">${e(companyName)} <i class="ti ti-arrow-right" style="font-size:10px"></i></span>`
+        : `<span style="font-weight:600">${e(companyName)}</span>`;
+      return `<div class="cmt-item">
+        <div class="cmt-av">${initials(companyName)}</div>
+        <div class="cmt-bubble">
+          <div class="cmt-meta" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px">
+            ${nameHtml}
+            <span>${e(s.created_by?.name||'?')} · ${fmtDate(s.created_at)}</span>
+          </div>
+          <div class="cmt-text" style="margin-top:4px">${formatCmtText(cmtText)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    body.innerHTML = `
+      <div style="font-size:10px;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:5px">
+        <i class="ti ti-info-circle"></i> Comentarios registrados desde empresas vinculadas a este proyecto
+      </div>
+      ${html}`;
+  } catch(err) {
+    body.innerHTML = `<div class="empty"><i class="ti ti-alert-circle"></i>Error: ${e(err.message)}</div>`;
+  }
+}
+
+function renderProjEmpresas(name) {
+  const c = companiesForProject(name);
+  const linked = new Set([...c.fu, ...c.presented, ...c.declined].map(t => t.gid));
+  const unlinked = tasks.filter(t => !t.completed && !linked.has(t.gid))
+                        .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+
+  const en = s => s.replace(/'/g, '&#39;');
+
+  // ─── Add-company form ───
+  const addForm = `
+    <div style="margin-bottom:14px">
+      <button class="btn btn-sm" onclick="toggleProjAddForm()" style="width:100%;justify-content:center">
+        <i class="ti ti-plus"></i> Añadir empresa al proyecto
+      </button>
+      <div id="proj-add-form" style="display:none;margin-top:8px" class="proj-add-box">
+        <div class="form-group" style="margin-bottom:8px">
+          <label class="form-label">Empresa</label>
+          <select class="form-input form-select" id="paf-empresa">
+            <option value="">— Seleccionar empresa —</option>
+            ${unlinked.map(t => `<option value="${t.gid}">${e(t.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-row" style="margin-bottom:8px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Estado</label>
+            <select class="form-input form-select" id="paf-status">
+              <option value="followUp">Follow Up</option>
+              <option value="presented">Presentado</option>
+              <option value="declined">Declinado</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Fecha</label>
+            <input class="form-input" type="date" id="paf-date" value="${todayStr()}">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">Notas / contexto (opcional)</label>
+          <textarea class="form-input" id="paf-notes" rows="2" placeholder="Contexto de la presentación, reunión, motivo…"></textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="onProjAddEmpresa('${en(name)}')"><i class="ti ti-check"></i> Guardar</button>
+          <button class="btn btn-sm" onclick="toggleProjAddForm()">Cancelar</button>
+        </div>
+      </div>
+    </div>`;
+
+  // ─── Company card ───
+  const companyCard = (t, status) => {
+    const log    = getCompanyLog(name, t.gid);
+    const logDate  = log?.date  || '';
+    const logNotes = log?.notes || '';
+    const rol    = cfEnum(t, CF.rol);
+    const contact = cfText(t, CF.contacto);
+    const cargo   = cfText(t, CF.cargo);
+
+    const editForm = `
+      <div class="pcr-edit-form" id="pcr-edit-${t.gid}" style="display:none">
+        <div class="form-row" style="margin-bottom:8px">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Estado</label>
+            <select class="form-input form-select" id="pce-status-${t.gid}">
+              <option value="followUp" ${status==='followUp'?'selected':''}>Follow Up</option>
+              <option value="presented" ${status==='presented'?'selected':''}>Presentado</option>
+              <option value="declined" ${status==='declined'?'selected':''}>Declinado</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">Fecha</label>
+            <input class="form-input" type="date" id="pce-date-${t.gid}" value="${logDate}">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:10px">
+          <label class="form-label">Notas / contexto</label>
+          <textarea class="form-input" id="pce-notes-${t.gid}" rows="2">${e(logNotes)}</textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="onProjSaveEdit('${en(name)}','${t.gid}')"><i class="ti ti-check"></i> Guardar</button>
+          <button class="btn btn-sm" onclick="cancelEditProjCompany('${t.gid}')">Cancelar</button>
+        </div>
+      </div>`;
+
+    const composeId = `pcr-cmp-${t.gid}`;
+    return `<div class="proj-company-wrap">
+      <div class="proj-company-row" style="cursor:default;align-items:flex-start">
+        <div class="pcr-main" style="cursor:pointer" onclick="goToEmpresa('${t.gid}')">
+          <div class="pcr-name">${e(t.name)}</div>
+          <div class="pcr-contact">${contact ? e(contact) : ''}${cargo ? ' · ' + e(cargo) : ''}${rolTag(rol)}</div>
+          ${logDate ? `<div class="pcr-log-date"><i class="ti ti-calendar-event"></i> ${fmtDateOnly(logDate)}</div>` : ''}
+          ${logNotes ? `<div class="pcr-log-notes">${e(logNotes)}</div>` : ''}
+          <div class="proj-company-activity" id="pca-${t.gid}">
+            <span class="proj-company-activity-text last-act-empty">Cargando actividad…</span>
+          </div>
+          <div class="pcr-footer" style="margin-top:4px">${statusBtns(t.gid, name, status)}</div>
+        </div>
+        <div class="pcr-row-actions">
+          <button class="icon-btn-sm" title="Editar fecha y notas" onclick="startEditProjCompany('${en(name)}','${t.gid}')"><i class="ti ti-pencil"></i></button>
+          <button class="icon-btn-sm del" title="Desvincular empresa" onclick="onProjRemoveCompany('${en(name)}','${t.gid}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      ${editForm}
+      <div class="pcr-compose">
+        <div class="att-preview" id="${composeId}-att" style="display:none;margin-bottom:6px">
+          <i class="ti ti-paperclip"></i>
+          <span class="att-name" id="${composeId}-attname"></span>
+          <button class="att-remove" onclick="clearPcrAttachment('${t.gid}')" title="Quitar archivo"><i class="ti ti-x"></i></button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:flex-end">
+          <textarea class="form-input" id="${composeId}-ta" placeholder="Comentario a esta empresa (empresa + proyecto)…" rows="1" style="flex:1;font-size:11px" onclick="event.stopPropagation()"></textarea>
+          <input type="file" id="${composeId}-file" style="display:none" onchange="onPcrFileSelected('${t.gid}',this)">
+          <button class="btn-attach" title="Adjuntar archivo" onclick="event.stopPropagation();document.getElementById('${composeId}-file').click()"><i class="ti ti-paperclip"></i></button>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();onProjEmpresaAddCmt('${t.gid}','${en(name)}')"><i class="ti ti-send"></i></button>
+        </div>
+      </div>
+    </div>`;
+  };
+
+  const group = (title, pill, items, status) => {
+    if (!items.length) return '';
+    return `<div style="margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span class="${pill}" style="padding:3px 10px">${title}</span>
+        <span style="font-size:11px;color:var(--text2)">${items.length} empresa${items.length > 1 ? 's' : ''}</span>
+      </div>
+      ${items.map(t => companyCard(t, status)).join('')}
+    </div>`;
+  };
+
+  const groupsHtml = group('Follow Up',  'pill-fu', c.fu,        'followUp') +
+                     group('Presentado', 'pill-pr', c.presented, 'presented') +
+                     group('Declinado',  'pill-dc', c.declined,  'declined');
+
+  document.getElementById('panel-body').innerHTML = addForm + (groupsHtml ||
+    '<div class="empty" style="padding:20px 0"><i class="ti ti-building-off"></i>Sin empresas asociadas — usa el botón de arriba para añadir</div>');
+
+  // Async: fill last Asana activity per company from the project task stories
+  const allCompanies = [...c.fu, ...c.presented, ...c.declined];
+  if (allCompanies.length) fillProjLastActivities(name, allCompanies);
+}
+
+async function fillProjLastActivities(projName, companies) {
+  const projTask = lookupProjTask(projName);
+  if (!projTask) {
+    companies.forEach(t => {
+      const el = document.getElementById(`pca-${t.gid}`);
+      if (el) el.innerHTML = '';
+    });
+    return;
+  }
+  try {
+    const stories = await fetchStoriesCached(projTask.gid);
+    companies.forEach(t => {
+      const el = document.getElementById(`pca-${t.gid}`);
+      if (!el) return;
+      const last = getLastCompanyStory(stories, t.name);
+      if (last) {
+        const txt = last.text.replace(/^\[Empresa:[^\]]+\]\n?/i, '').trim();
+        const { textPart, attName, attGid } = parseStoryContent(txt);
+        const short = textPart.length > 80 ? textPart.slice(0, 80) + '…' : textPart;
+        el.innerHTML = `<span class="proj-company-activity-date"><i class="ti ti-message" style="font-size:9px;vertical-align:-1px"></i> ${fmtDateOnly(last.created_at.slice(0,10))}</span>
+          <span class="proj-company-activity-text">${e(short)}${attGid ? ` <span class="att-chip" style="margin-top:0;font-size:10px;padding:1px 6px" onclick="openAttachment('${attGid}',this)"><i class="ti ti-paperclip"></i>${e(attName)}</span>` : ''}</span>`;
+      } else {
+        el.innerHTML = '';
+      }
+    });
+  } catch {
+    companies.forEach(t => {
+      const el = document.getElementById(`pca-${t.gid}`);
+      if (el) el.innerHTML = '';
+    });
+  }
+}
+
+// ─── Project-panel company management handlers ───
+
+function toggleProjAddForm() {
+  const f = document.getElementById('proj-add-form');
+  if (f) f.style.display = f.style.display === 'none' ? '' : 'none';
+}
+
+async function onProjAddEmpresa(projName) {
+  const gidEl  = document.getElementById('paf-empresa');
+  const stEl   = document.getElementById('paf-status');
+  const dateEl = document.getElementById('paf-date');
+  const notesEl= document.getElementById('paf-notes');
+  if (!gidEl?.value) { toast('Selecciona una empresa', true); return; }
+  const companyGid = gidEl.value;
+  const task = tasks.find(t => t.gid === companyGid);
+  if (!task) return;
+  const status = stEl?.value || 'followUp';
+  const date   = dateEl?.value || todayStr();
+  const notes  = notesEl?.value.trim() || '';
+  await changeProjStatus(companyGid, projName, status);
+  upsertLogEntry(projName, companyGid, task.name, status, date, notes);
+  renderProjEmpresas(projName);
+}
+
+function startEditProjCompany(projName, companyGid) {
+  const el = document.getElementById(`pcr-edit-${companyGid}`);
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function cancelEditProjCompany(companyGid) {
+  const el = document.getElementById(`pcr-edit-${companyGid}`);
+  if (el) el.style.display = 'none';
+}
+
+async function onProjSaveEdit(projName, companyGid) {
+  const stEl   = document.getElementById(`pce-status-${companyGid}`);
+  const dateEl = document.getElementById(`pce-date-${companyGid}`);
+  const notesEl= document.getElementById(`pce-notes-${companyGid}`);
+  const newStatus = stEl?.value || 'followUp';
+  const newDate   = dateEl?.value || todayStr();
+  const newNotes  = notesEl?.value.trim() || '';
+  const task = tasks.find(t => t.gid === companyGid);
+  if (!task) return;
+  const existing = getCompanyLog(projName, companyGid);
+  if (!existing || existing.status !== newStatus) {
+    await changeProjStatus(companyGid, projName, newStatus);
+  }
+  upsertLogEntry(projName, companyGid, task.name, newStatus, newDate, newNotes);
+  renderProjEmpresas(projName);
+  toast('Guardado');
+}
+
+async function onProjRemoveCompany(projName, companyGid) {
+  const task = tasks.find(t => t.gid === companyGid);
+  if (!task) return;
+  if (!confirm(`¿Desvincular "${task.name}" del proyecto "${projName}"?`)) return;
+  await removeProjFromCompany(companyGid, projName);
+}
+
+async function saveProjField(name, key, value, el, isPct=false) {
+  // ── Rename project ──
+  if (key === 'nombre') {
+    const newName = value.trim();
+    if (!newName || newName === name) return;
+    const projTask = lookupProjTask(name);
+    if (!projTask) { toast('Proyecto no encontrado en Asana', true); return; }
+    try {
+      await req('PUT', `/tasks/${projTask.gid}`, { name: newName });
+      const idx = projExpTasks.findIndex(t => t.gid === projTask.gid);
+      if (idx >= 0) projExpTasks[idx].name = newName;
+      saveProjCache();
+      panelGid = newName;
+      document.getElementById('panel-title').textContent = newName;
+      if (el) { el.dataset.proj = newName; el.classList.add('saved-flash'); setTimeout(() => el.classList.remove('saved-flash'), 1200); }
+      toast('Nombre actualizado en Asana');
+      if (curView === 'proyectos') renderProyectos();
+    } catch(err) {
+      if (el) { el.value = name; el.classList.add('err-flash'); setTimeout(() => el.classList.remove('err-flash'), 1500); }
+      toast('Error: ' + err.message, true);
+    }
+    return;
+  }
+
+  const task = lookupProjTask(name);
+  const num = parseFloat(value);
+  const saveNum = isPct ? num / 100 : num;
+
+  if (!task) {
+    if (!projs[name]) projs[name] = {};
+    projs[name][key] = key === 'descripcion' ? value.trim() : (isNaN(saveNum) ? null : saveNum);
+    localStorage.setItem('crm2_projs', JSON.stringify(projs));
+    if (el) { el.classList.add('saved-flash'); setTimeout(() => el.classList.remove('saved-flash'), 1200); }
+    toast('Guardado localmente');
+    if (curView === 'proyectos') renderProyectos();
+    return;
+  }
+
+  let body = {};
+  if (key === 'descripcion') {
+    body = { notes: value };
+  } else {
+    const cfGid = PROJ_CF[key];
+    if (!cfGid) return; // unknown key, ignore
+    body = { custom_fields: { [cfGid]: isNaN(saveNum) ? null : saveNum } };
+  }
+
+  try {
+    await req('PUT', `/tasks/${task.gid}`, body);
+    const fresh = await req('GET', `/tasks/${task.gid}?opt_fields=${PROJ_OPT_FIELDS}`);
+    const idx = projExpTasks.findIndex(t => t.gid === task.gid);
+    if (idx >= 0) projExpTasks[idx] = fresh.data;
+    saveProjCache();
+    if (el) { el.classList.add('saved-flash'); setTimeout(() => el.classList.remove('saved-flash'), 1200); }
+    toast('Guardado en Asana');
+    if (curView === 'proyectos') renderProyectos();
+  } catch(err) {
+    if (el) { el.classList.add('err-flash'); setTimeout(() => el.classList.remove('err-flash'), 1500); }
+    toast('Error: ' + err.message, true);
+  }
+}
+
+function onPcrFileSelected(companyGid, input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const composeId = `pcr-cmp-${companyGid}`;
+  const wrap = document.getElementById(`${composeId}-att`);
+  const nameEl = document.getElementById(`${composeId}-attname`);
+  if (wrap && nameEl) { nameEl.textContent = file.name; wrap.style.display = 'flex'; }
+}
+
+function clearPcrAttachment(companyGid) {
+  const composeId = `pcr-cmp-${companyGid}`;
+  const input = document.getElementById(`${composeId}-file`);
+  if (input) input.value = '';
+  const wrap = document.getElementById(`${composeId}-att`);
+  if (wrap) wrap.style.display = 'none';
+}
+
+async function onProjEmpresaAddCmt(companyGid, projName) {
+  const composeId = `pcr-cmp-${companyGid}`;
+  const ta = document.getElementById(`${composeId}-ta`);
+  const fileInput = document.getElementById(`${composeId}-file`);
+  const file = fileInput?.files?.[0];
+  const text = ta?.value.trim();
+  if (!text && !file) return;
+  const sendBtn = ta?.closest('.pcr-compose')?.querySelector('.btn-primary');
+  if (sendBtn) sendBtn.disabled = true;
+  try {
+    let attTag = '';
+    if (file) {
+      toast('Subiendo archivo…');
+      const att = await uploadAttachment(companyGid, file);
+      attTag = `\n📎 ${att.name} [ATTACH:${att.gid}]`;
+    }
+    const task = tasks.find(t => t.gid === companyGid);
+    const companyName = task ? task.name : companyGid;
+    const fullText = text + attTag;
+    await postStory(companyGid, `[Proyecto: ${projName}]\n${fullText}`);
+    const projTask = lookupProjTask(projName);
+    if (projTask) await postStory(projTask.gid, `[Empresa: ${companyName}]\n${fullText}`);
+    delete storyCache[companyGid];
+    if (projTask) delete storyCache[projTask.gid];
+    ta.value = '';
+    clearPcrAttachment(companyGid);
+    renderProjEmpresas(projName);
+    toast(projTask ? 'Comentario registrado en empresa y proyecto' : 'Comentario registrado en empresa');
+  } catch(err) {
+    toast('Error: ' + err.message, true);
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════
+function toast(msg, isErr=false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = isErr ? 'is-err' : '';
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.style.display='none', 3500);
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify({tasks, extra, projExpTasks}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `crm_export_${new Date().toISOString().slice(0,10)}.json`; a.click();
+}
+
+function clearCache() {
+  if (!confirm('¿Limpiar caché? Los contactos extra (localStorage) se conservan. Los datos en Asana no se borran.')) return;
+  localStorage.removeItem('crm2_cache');
+  localStorage.removeItem('crm2_projexp');
+  localStorage.removeItem('crm2_projstatusfield');
+  tasks = []; projExpTasks = [];
+  projStatusField = null;
+  toast('Caché limpiada');
+  renderView();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+(async function init() {
+  try {
+    const cached = localStorage.getItem('crm2_cache');
+    if (cached) {
+      const { ts, tasks: ct } = JSON.parse(cached);
+      tasks = ct || [];
+      lastSync = new Date(ts);
+      document.getElementById('sync-info').textContent = 'Cache ' + lastSync.toLocaleTimeString();
+    }
+    const projCached = localStorage.getItem('crm2_projexp');
+    if (projCached) {
+      const { tasks: pt } = JSON.parse(projCached);
+      projExpTasks = pt || [];
+    }
+    if (tasks.length || projExpTasks.length) {
+      updateBadges();
+      renderView();
+    }
+  } catch(_) {}
+
+  if (!PAT) { nav('config'); return; }
+
+  document.getElementById('btn-sync').style.display = '';
+  if (curView === 'empresas') document.getElementById('btn-add').style.display = '';
+
+  try {
+    await syncNow();
+    startAutoSync();
+  } catch(err) {
+    if (!tasks.length) nav('config');
+  }
+})();
+</script>
+</body>
+</html>
